@@ -1,0 +1,24 @@
+{
+    "id": "4F264904",
+    "path": "~/Documents/Research/Wellstein/Projects/methyldeconvolveR/R/read_files.R",
+    "project_path": "R/read_files.R",
+    "type": "r_source",
+    "hash": "1591628394",
+    "contents": "",
+    "dirty": false,
+    "created": 1659388318043.0,
+    "source_on_save": false,
+    "relative_order": 7,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1659118794,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1659118794,
+    "read_only": false,
+    "read_only_alternatives": []
+}

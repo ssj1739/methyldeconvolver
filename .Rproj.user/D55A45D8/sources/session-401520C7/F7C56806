@@ -1,0 +1,26 @@
+{
+    "id": "F7C56806",
+    "path": "~/Documents/Research/Wellstein/Projects/methyldeconvolveR/test_scripts/MixInTest.R",
+    "project_path": "test_scripts/MixInTest.R",
+    "type": "r_source",
+    "hash": "0",
+    "contents": "",
+    "dirty": false,
+    "created": 1661814378961.0,
+    "source_on_save": false,
+    "relative_order": 4,
+    "properties": {
+        "source_window_id": "",
+        "Source": "Source",
+        "cursorPosition": "59,0",
+        "scrollLine": "47"
+    },
+    "folds": "",
+    "lastKnownWriteTime": 1661867970,
+    "encoding": "UTF-8",
+    "collab_server": "",
+    "source_window": "",
+    "last_content_update": 1661867970553,
+    "read_only": false,
+    "read_only_alternatives": []
+}
