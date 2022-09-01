@@ -1,7 +1,6 @@
+#library(methyldeconvolveR)
 library(pbapply)
 library(reshape2)
-library(dplyr)
-library(caret)
 
 #functions
 encode_binary <- function(read){
@@ -21,7 +20,7 @@ set.seed(1234)
 
 ###Simulation psuedo code
 #input(num_celltypes, num_markers_per_celltype, num_reads)
-num_celltypes = 10
+num_celltypes = 5
 num_markers_per_celltype = 50
 num_reads = 10000
 
@@ -37,14 +36,11 @@ colnames(true_alpha) <- c('cell_idx', 'alpha')
 true_alpha$cell_idx <- as.factor(true_alpha$cell_idx)
 
 n.iters <- 100
-n.trials <- 6
-
+n.trials <- 3
 
 trial_output <- pblapply(1:n.trials, function(trial){ # Loop through multiple trials with varying amounts of noise
-  zeta0 = -2
-  zeta1 = 5*trial
   trial.iters <- pblapply(1:n.iters, function(x){ #perform multiple iterations for each noise level
-    
+    noise = runif(1, min=(((trial-1)/n.trials)), max = (trial/n.trials))
     #Generate marker target indicator variable column:
     sequence <- c((rep(0, num_celltypes-1)),1)
     permutations <- arrangements::permutations(sort(unique(sequence)), freq = table(sequence),layout="list")
@@ -94,8 +90,7 @@ trial_output <- pblapply(1:n.trials, function(trial){ # Loop through multiple tr
       cell_origin <- which(cell_sim == 1) 
       ref_sub_target <- subset(ref, cell_idx == cell_origin & target == 1) #subset reference by cell of origin
       ref_sub_noise <- subset(ref, cell_idx == cell_origin & target == 0) #subset reference by cell of origin
-      noise <- exp(zeta0+zeta1*true_alpha[cell_origin,"alpha"])/(1+exp(zeta0+zeta1*true_alpha[cell_origin,"alpha"]))
-      n <- rbinom(1,1,noise)
+      n <- rbinom(1,1,1-noise)
       if (n == 1){
         ref_sample <- ref_sub_target[sample(nrow(ref_sub_target), 1), ] #sample row from reference subset for alignment
       } else {ref_sample <- ref_sub_noise[sample(nrow(ref_sub_noise), 1), ]}
@@ -276,7 +271,7 @@ trial_output <- pblapply(1:n.trials, function(trial){ # Loop through multiple tr
       return(alpha)
     })
     
-    return(c("zeta1" = zeta1,"weighted.rmse" = caret::RMSE(weighted.alphas[[1]], obs = true_alpha[,"alpha"]),
+    return(c("noise"=noise,"weighted.rmse" = caret::RMSE(weighted.alphas[[1]], obs = true_alpha[,"alpha"]),
              "unweighted.rmse" = caret::RMSE(unweighted.alphas[[1]], obs = true_alpha[,"alpha"]),
              list("weighted.alphas" = weighted.alphas[[1]]), 
              list("unweighted.alphas" = unweighted.alphas[[1]])))
@@ -286,14 +281,14 @@ trial_output <- pblapply(1:n.trials, function(trial){ # Loop through multiple tr
 
 #Output cell type proportion estimates and create box plot
 unweighted.sim.out <- matrix(nrow = (n.iters*n.trials), ncol = num_celltypes)
-zeta.vec <- c()
+noise.vec <- c()
 rmse.vec <- c()
 idx=1
 for(i in 1:length(trial_output)){
   for(n in 1:n.iters){
     for(c in 1:num_celltypes){
       unweighted.sim.out[idx,c] <- trial_output[[i]][[1]][[n]]$unweighted.alphas[c]}
-    zeta.vec <-append(zeta.vec,trial_output[[i]][[1]][[n]]$zeta1)
+    noise.vec <-append(noise.vec,trial_output[[i]][[1]][[n]]$noise)
     rmse.vec <-append(rmse.vec,trial_output[[i]][[1]][[n]]$unweighted.rmse)
     idx = idx+1
   }
@@ -314,6 +309,7 @@ for(i in 1:length(trial_output)){
     idx = idx+1
   }
 }
+
 weighted.sim.out <- melt(weighted.sim.out)
 colnames(weighted.sim.out) <- c('trial','cell_idx','alpha')
 weighted.sim.out$model <- rep('weighted',length(weighted.sim.out$alpha))
@@ -322,25 +318,27 @@ weighted.sim.out$rmse <- rep(rmse.vec, num_celltypes)
 sim.out <- rbind(unweighted.sim.out,weighted.sim.out)
 sim.out$model <- as.factor(sim.out$model)
 sim.out$cell_idx <- as.factor(sim.out$cell_idx)
-sim.out$zeta1 <- rep(zeta.vec, (num_celltypes*2))
-sim.out$zeta1 <- as.factor(sim.out$zeta1)
+sim.out$noise <- rep(noise.vec, (num_celltypes*2))
 
-write.csv(sim.out,"C:/Users/Patri/Documents/School/Georgetown/Thesis/Deconv Sim/sim.out.10.50.weightedv2.csv", row.names = FALSE)
+sim.out <- within(sim.out, {   
+  noise.cat <- NA # need to initialize variable
+  noise.cat[noise < 0.33] <- "Low"
+  noise.cat[noise >= 0.33 & noise < 0.67] <- "Middle"
+  noise.cat[noise >= 0.67] <- "High"
+} )
+
+write.csv(sim.out,"C:/Users/Patri/Documents/School/Georgetown/Thesis/Deconv Sim/sim.out.5.50.noisev2.csv", row.names = FALSE)
 
 p <- ggplot(data = sim.out, aes(x=cell_idx, y=alpha, group=cell_idx)) + 
   geom_boxplot(aes(fill=cell_idx),alpha=0.3) +
-  labs(title="10 Cell Types - 50 Markers Per - Weighted Model",
+  labs(title="5 Cell Types - 50 Markers Per - Uniform Noise",
        x ="Cell Type", y = "Proportion Estimate")+
-  geom_point(data = sim.out, aes(x=cell_idx, y=alpha, col=zeta1),position = position_jitter())+
+  geom_point(data = sim.out, aes(x=cell_idx, y=alpha, col=noise.cat),position = position_jitter())+
   theme_minimal() +
   #theme(legend.position="none")+
   geom_point(data=data.frame(true_alpha), aes(x=cell_idx, y=alpha), color="black")+
   facet_wrap(~model)
 p
 
-sim.5.weighted <- read.csv("C:/Users/Patri/Documents/School/Georgetown/Thesis/Deconv Sim/sim.out.5.50.weightedv2.csv")
-factors <- c('cell_idx','model','zeta1')
-sim.5.weighted[,factors] <- lapply(sim.5.weighted[,factors], as.factor)
-
-summary <- sim.5.weighted %>% group_by(model,zeta1,cell_idx)%>%summarise(mean = mean(alpha), sd = sd(alpha))
-rmse <- sim.5.weighted %>% group_by(model,zeta1)%>%summarise(rmse = mean(rmse))
+summary <- sim.out %>% group_by(model,noise.cat,cell_idx)%>%summarise(mean = mean(alpha), sd = sd(alpha))
+rmse <- sim.out %>% group_by(model,noise.cat)%>%summarise(rmse = mean(rmse))
