@@ -12,6 +12,11 @@ pat <- read_pat("data/Test25_1.pat.gz")
 
 ref <- learn_reference(marker.file = "data/Human_mixintest_top25.txt", pat.dir = "data/ref/", save.output = "test_reference.rds", verbose = T)
 
+res_unweighted <- deconvolute_sample(sample.pat.path = "data/Test25_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 10)
+
+
+res_weighted <- deconvolute_sample_weighted(sample.pat.path = "data/Test25_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 10)
+
 # Calculating the number of read * observations for each marker
 aligned.read.nobs <- overlaps.list$pat.gr$nobs[overlaps.list$overlaps@from]
 table(rep(overlaps.list$overlaps@to, aligned.read.nobs))

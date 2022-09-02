@@ -7,11 +7,14 @@
 read_pat(path = "data/Hep_all.pat.gz", linelimit = Inf, verbose = F)
 }
 \arguments{
-\item{path}{}
+\item{path}{character indicating path to PAT file. May be gzipped.}
 
-\item{linelimit}{}
+\item{linelimit}{numeric. Default Inf.}
 
-\item{verbose}{}
+\item{verbose}{logical. Default FALSE.}
+}
+\value{
+data.frame containing contents of pat file.
 }
 \description{
 read_pat

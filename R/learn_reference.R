@@ -21,7 +21,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   marker = read_marker(marker.file)
   
   # Identify # of Pat files in pat.dir, ensure correct formats
-  pat.files = dir(pat.dir, full.names = F)
+  pat.files = dir(pattern = "*.pat*", pat.dir, full.names = F)
   
   # Loop through each pat file in directory
   if(verbose) message("Starting to loop through pat files:")

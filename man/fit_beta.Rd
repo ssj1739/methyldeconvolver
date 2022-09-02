@@ -12,7 +12,7 @@ fit_beta(overlaps.list, epsilon = 1e-07)
 \item{epsilon}{add pseudocount to avoid Inf/-Inf log values}
 }
 \value{
-beta params for each marker region
+beta params for each marker region using stats::optim
 }
 \description{
 fit_beta

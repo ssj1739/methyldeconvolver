@@ -11,6 +11,9 @@ read_marker(path = "data/Human_mixintest_top25.txt", linelimit = Inf)
 
 \item{linelimit}{}
 }
+\value{
+data.frame containing marker file contents
+}
 \description{
 read_marker
 }
