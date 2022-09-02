@@ -134,8 +134,8 @@ deconvolute_sample_weighted <- function(sample.pat.path,
       omega.vec.1 <- predict(zeta.fit, newdata = data.frame(alpha = alpha.old.1), type = "response")
       omega.vec.0 <- predict(zeta.fit, newdata = data.frame(alpha = alpha.old.0), type = "response")
       
-      transpose_prod.1 <- sweep(psi.mat[y.mat[,2]==1,], MARGIN = 2, alpha.old.1 * omega.vec.1, '*')
-      transpose_prod.0 <- sweep(psi.mat[y.mat[,2]==0,], MARGIN = 2, alpha.old.0 * (1-omega.vec.0), '*')
+      transpose_prod.1 <- sweep(psi.mat[y.mat[,1]==1,], MARGIN = 2, alpha.old.1 * omega.vec.1, '*')
+      transpose_prod.0 <- sweep(psi.mat[y.mat[,1]==0,], MARGIN = 2, alpha.old.0 * (1-omega.vec.0), '*')
         
         # Calculate new phi
       #  phi <- transpose_prod/rowSums(transpose_prod)
@@ -143,10 +143,10 @@ deconvolute_sample_weighted <- function(sample.pat.path,
        phi.0 <- transpose_prod.0/rowSums(transpose_prod.0)
 
        # Calculate new alphas
-       cs.1 = colSums(phi.1 * sample.pat$nobs[y==1, omp$overlaps@from])
+       cs.1 = colSums(phi.1 * sample.pat$nobs[omp$overlaps@from[y.mat[,1]==1]])
        new.alpha.1 = cs.1 / sum(cs.1)
        
-       cs.0 = colSums(phi.0 * sample.pat$nobs[y==0, omp$overlaps@from])
+       cs.0 = colSums(phi.0 * sample.pat$nobs[omp$overlaps@from][y.mat[,1]==0])
        new.alpha.0 = cs.0 / sum(cs.0)
      
       omega.vec.1 <- predict(zeta.fit, newdata = data.frame(alpha = new.alpha.1), type = "response")
