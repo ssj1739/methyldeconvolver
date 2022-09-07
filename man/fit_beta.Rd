@@ -2,18 +2,20 @@
 % Please edit documentation in R/fit_beta.R
 \name{fit_beta}
 \alias{fit_beta}
-\title{fit_beta}
+\title{fit_beta
+Fits a beta distribution to given methylation signals from sample pat file}
 \usage{
-fit_beta(overlaps.list, epsilon = 1e-07)
+fit_beta(overlaps.list, pseudo = 1e-07, verbose = F)
 }
 \arguments{
 \item{overlaps.list}{output from overlap_marker_pat}
 
-\item{epsilon}{add pseudocount to avoid Inf/-Inf log values}
+\item{pseudo}{add pseudocount to avoid Inf/-Inf log values (default = 1e-7)}
 }
 \value{
 beta params for each marker region using stats::optim
 }
 \description{
 fit_beta
+Fits a beta distribution to given methylation signals from sample pat file
 }

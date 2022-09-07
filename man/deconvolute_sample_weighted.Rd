@@ -16,7 +16,7 @@ deconvolute_sample_weighted(
 \arguments{
 \item{sample.pat.path}{}
 
-\item{reference}{}
+\item{reference}{- ref object outputted by \link{learn_reference}}
 
 \item{num_of_inits}{numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).}
 }
@@ -25,4 +25,10 @@ list of alpha from each initialization.
 }
 \description{
 deconvolution step
+}
+\examples{
+\dontrun{
+ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
+deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+}
 }

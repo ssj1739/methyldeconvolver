@@ -17,3 +17,8 @@ data.frame containing marker file contents
 \description{
 read_marker
 }
+\examples{
+\dontrun{
+read_marker(path = "inst_data/human_mixintest_top25.txt")
+}
+}

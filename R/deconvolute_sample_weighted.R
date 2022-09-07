@@ -1,13 +1,17 @@
 #' deconvolution step
 #'
 #' @param sample.pat.path 
-#' @param reference 
+#' @param reference - ref object outputted by \link{learn_reference}
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
 #'
 #' @return list of alpha from each initialization.
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
+#' deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+#' }
 deconvolute_sample_weighted <- function(sample.pat.path, 
                                reference, 
                                verbose = F, 
@@ -91,7 +95,7 @@ deconvolute_sample_weighted <- function(sample.pat.path,
   num_celltypes <- length(unique(reference$marker$target))
   # Set first prior to uniform prior
   alpha.inits <- lapply(1:(num_of_inits+1), function(x){
-    alpha <- runif(num_celltypes)
+    alpha <- stats::runif(num_celltypes)
     alpha  <- unlist(lapply(alpha, function(x) x/sum(alpha) )) # Normalize priors to 1
     names(alpha) <- names(reference$beta_celltype_fits)
     return(alpha)
@@ -129,10 +133,10 @@ deconvolute_sample_weighted <- function(sample.pat.path,
         
       # Learn weights to apply to each read
       learn.zeta.mat <- data.frame(y = y.mat[,1], alpha = alpha.old[y.mat[,2]])
-      zeta.fit <- glm(y ~ alpha, data = learn.zeta.mat, family="binomial")
+      zeta.fit <- stats::glm(y ~ alpha, data = learn.zeta.mat, family="binomial")
         
-      omega.vec.1 <- predict(zeta.fit, newdata = data.frame(alpha = alpha.old.1), type = "response")
-      omega.vec.0 <- predict(zeta.fit, newdata = data.frame(alpha = alpha.old.0), type = "response")
+      omega.vec.1 <- stats::predict(zeta.fit, newdata = data.frame(alpha = alpha.old.1), type = "response")
+      omega.vec.0 <- stats::predict(zeta.fit, newdata = data.frame(alpha = alpha.old.0), type = "response")
       
       transpose_prod.1 <- sweep(psi.mat[y.mat[,1]==1,], MARGIN = 2, alpha.old.1 * omega.vec.1, '*')
       transpose_prod.0 <- sweep(psi.mat[y.mat[,1]==0,], MARGIN = 2, alpha.old.0 * (1-omega.vec.0), '*')
@@ -168,7 +172,8 @@ deconvolute_sample_weighted <- function(sample.pat.path,
       all.alphas.1[[i.iter]] <- alpha.1
       all.alphas.0[[i.iter]] <- alpha.0
       all.alphas[[i.iter]] <- alpha
-    
+      
+      mad = c(mad.1, mad.0)
     }
     return(list(last_alpha = alpha, iter_mad = mad))
   }, cl = n_threads)

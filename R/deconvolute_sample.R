@@ -8,6 +8,10 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
+#' deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+#' }
 deconvolute_sample <- function(sample.pat.path, 
                                reference, 
                                verbose = F, 
@@ -65,7 +69,7 @@ deconvolute_sample <- function(sample.pat.path,
       pbapply::setpb(pb = pb, value = i)
   }
   if(verbose)
-    on.exit(closepb(pb))
+    on.exit(pbapply::closepb(pb))
   
   if(verbose) message("Performing EM")
   
@@ -73,7 +77,7 @@ deconvolute_sample <- function(sample.pat.path,
   num_celltypes <- length(unique(reference$marker$target))
   # Set first prior to uniform prior
   alpha.inits <- lapply(1:(num_of_inits+1), function(x){
-    alpha <- runif(num_celltypes)
+    alpha <- stats::runif(num_celltypes)
     alpha  <- unlist(lapply(alpha, function(x) x/sum(alpha) )) # Normalize priors to 1
     names(alpha) <- names(reference$beta_celltype_fits)
     return(alpha)

@@ -3,9 +3,11 @@
 #' @param overlaps.list 
 #'
 #' @return DEPRECATED - list of beta params using fitdistr
-#' @export
 #'
 #' @examples
+#' \dontrun{
+#' fit_beta_old(overlaps.list, pf = 0.05)
+#' }
 fit_beta_old <- function(overlaps.list, pf = 0.05){
   require(fitdistrplus)
   
@@ -63,21 +65,28 @@ fit_beta_old <- function(overlaps.list, pf = 0.05){
 }
 
 #' fit_beta
+#' Fits a beta distribution to given methylation signals from sample pat file
 #'
 #' @param overlaps.list output from overlap_marker_pat
-#' @param epsilon add pseudocount to avoid Inf/-Inf log values
+#' @param pseudo add pseudocount to avoid Inf/-Inf log values (default = 1e-7)
 #'
 #' @return beta params for each marker region using stats::optim
 #' @export
 #'
 #' @examples
-fit_beta <- function(overlaps.list, epsilon = 1e-7){
+#' \dontrun{
+#' fit_beta(overlaps.list)
+#' }
+fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
   require(stats)
   require(dplyr)
   require(stringr)
   
   marker.pat.overlaps <- overlaps.list$overlaps
   pat.ranges <- overlaps.list$pat.gr
+  
+  if(verbose)
+    message("Learning beta distr. parameters.")
   
   beta_fits <- lapply(1:length(overlaps.list$marker.gr), function(x){
     pat.index <- marker.pat.overlaps@from[marker.pat.overlaps@to == x]
@@ -100,8 +109,8 @@ fit_beta <- function(overlaps.list, epsilon = 1e-7){
     rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs)
     
     # Prevent taking the log of 0:
-    rep.meth.fraction[rep.meth.fraction==0] <- rep.meth.fraction[rep.meth.fraction==0]+epsilon
-    rep.meth.fraction[rep.meth.fraction==1] <- rep.meth.fraction[rep.meth.fraction==1]-epsilon
+    rep.meth.fraction[rep.meth.fraction==0] <- rep.meth.fraction[rep.meth.fraction==0]+pseudo
+    rep.meth.fraction[rep.meth.fraction==1] <- rep.meth.fraction[rep.meth.fraction==1]-pseudo
     
     fit <- rep(NA, 2)
     beta.f <- NA

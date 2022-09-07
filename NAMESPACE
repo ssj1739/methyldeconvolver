@@ -2,9 +2,9 @@
 
 export("%>%")
 export(deconvolute_sample)
+export(deconvolute_sample_weighted)
 export(encode_binary)
 export(fit_beta)
-export(fit_beta_old)
 export(learn_reference)
 export(overlap_marker_pat)
 export(read_marker)

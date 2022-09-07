@@ -9,6 +9,9 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' read_pat(path = "path/to/pat_file.pat.gz")
+#' }
 read_pat <- function(path="data/Hep_all.pat.gz", linelimit = Inf, verbose = F){
   require(data.table)
   require(dplyr)
@@ -35,14 +38,16 @@ read_pat <- function(path="data/Hep_all.pat.gz", linelimit = Inf, verbose = F){
 
 
 #' read_pat2
-#'
+#' Meant to be a more efficient way to stream in large pat files. Still not ready for export.
 #' @param path 
 #' @param chunksize 
 #'
 #' @return
-#' @export
 #'
 #' @examples
+#' \dontrun{
+#' read_pat2(path = "path/to/pat_file.pat.gz")
+#' }
 read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
   require(utils)
   # First check number of lines
@@ -67,13 +72,14 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' @export
 #'
 #' @examples
+#' \dontrun{
+#' read_marker(path = "inst_data/human_mixintest_top25.txt")
+#' }
 read_marker <- function(path="data/Human_mixintest_top25.txt", linelimit = Inf){
   require(data.table)
   marker = data.table::fread(path, nrows = linelimit, header = T)
   
-  ### NOTE: Temporary filtering step for Chr 1-8
-  # marker2 <- marker %>%
-  #   dplyr::filter(chr %in% paste0("chr", 1:8))
+  # TODO: Valudate marker file format
   
   return(marker)
 }

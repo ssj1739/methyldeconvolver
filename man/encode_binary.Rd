@@ -2,13 +2,19 @@
 % Please edit documentation in R/tools.R
 \name{encode_binary}
 \alias{encode_binary}
-\title{encode_binary}
+\title{encode_binary Calculate binary representation of methylation after bisulfite conversion}
 \usage{
 encode_binary(read)
 }
 \arguments{
-\item{read}{}
+\item{read}{string of DNA methylation read (containing T and C)}
 }
 \description{
-encode_binary
+Given a string of T and C, calculates the binary representation of that methylation.
+0 represents non-methylated cytosines, and 1 represents methylated cytosines (converted to T)
+}
+\examples{
+\dontrun{
+encode_binary("C...CT")
+}
 }

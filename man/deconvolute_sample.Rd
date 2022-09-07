@@ -26,3 +26,9 @@ list of alpha from each initialization.
 \description{
 deconvolution step
 }
+\examples{
+\dontrun{
+ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
+deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+}
+}

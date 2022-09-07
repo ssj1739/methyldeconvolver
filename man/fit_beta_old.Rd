@@ -15,3 +15,8 @@ DEPRECATED - list of beta params using fitdistr
 \description{
 fit_beta_old
 }
+\examples{
+\dontrun{
+fit_beta_old(overlaps.list, pf = 0.05)
+}
+}
