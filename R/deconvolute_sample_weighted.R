@@ -3,6 +3,10 @@
 #' @param sample.pat.path 
 #' @param reference - ref object outputted by \link{learn_reference}
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
+#' @param weighting_n_sigma numeric - how many st. devs. away from mean should reads be downweighted?
+#' @param verbose logical - default False
+#' @param max_iter
+#' @param n_threads
 #'
 #' @return list of alpha from each initialization.
 #' @export
@@ -14,7 +18,8 @@
 #' }
 deconvolute_sample_weighted <- function(sample.pat.path, 
                                reference, 
-                               verbose = F, 
+                               verbose = F,
+                               weighting_n_sigma = 3,
                                num_of_inits = 10, max_iter = 100,
                                n_threads = 1){
   # LOAD LIBRARIES
@@ -55,7 +60,7 @@ deconvolute_sample_weighted <- function(sample.pat.path,
     mu = sapply(reference$beta_celltype_fits, function(x) return(x$mu[x$marker.index==omp$overlaps@to[i]]))
     sigma = sapply(reference$beta_celltype_fits, function(x) return(x$sigma[x$marker.index==omp$overlaps@to[i]]))
     
-    n.sigma = 3 ## TODO: PARAMETERIZE THIS
+    n.sigma = weighting_n_sigma ## TODO: PARAMETERIZE THIS
       
     target <- omp$marker.gr$target[omp$overlaps@to[i]]
     upper.bound <- mu[target] + n.sigma * sigma[target]
@@ -100,6 +105,7 @@ deconvolute_sample_weighted <- function(sample.pat.path,
     names(alpha) <- names(reference$beta_celltype_fits)
     return(alpha)
   })
+  # Set first alpha init to uniform prior
   alpha.inits[[1]] <- rep(1, num_celltypes) / num_celltypes
   names(alpha.inits[[1]]) <- names(reference$beta_celltype_fits)
   
@@ -138,8 +144,8 @@ deconvolute_sample_weighted <- function(sample.pat.path,
       omega.vec.1 <- stats::predict(zeta.fit, newdata = data.frame(alpha = alpha.old.1), type = "response")
       omega.vec.0 <- stats::predict(zeta.fit, newdata = data.frame(alpha = alpha.old.0), type = "response")
       
-      transpose_prod.1 <- sweep(psi.mat[y.mat[,1]==1,], MARGIN = 2, alpha.old.1 * omega.vec.1, '*')
-      transpose_prod.0 <- sweep(psi.mat[y.mat[,1]==0,], MARGIN = 2, alpha.old.0 * (1-omega.vec.0), '*')
+      transpose_prod.1 <- sweep(psi.mat[which(y.mat[,1]==1),], MARGIN = 2, alpha.old.1 * omega.vec.1, '*')
+      transpose_prod.0 <- sweep(psi.mat[which(y.mat[,1]==0),], MARGIN = 2, alpha.old.0 * (1-omega.vec.0), '*')
         
         # Calculate new phi
       #  phi <- transpose_prod/rowSums(transpose_prod)
@@ -148,11 +154,10 @@ deconvolute_sample_weighted <- function(sample.pat.path,
 
        # Calculate new alphas
 
-       cs.1 = colSums(phi.1 * sample.pat$nobs[y.mat[,1]==1, omp$overlaps@from])
+       cs.1 = colSums(phi.1 * sample.pat$nobs[omp$overlaps@from[which(y.mat[,1]==1)]])
        new.alpha.1 = cs.1 / sum(cs.1)
        
-       cs.0 = colSums(phi.0 * sample.pat$nobs[y.mat[,1]==0,, omp$overlaps@from])
-
+       cs.0 = colSums(phi.0 * sample.pat$nobs[omp$overlaps@from[which(y.mat[,1]==0)]])
        new.alpha.0 = cs.0 / sum(cs.0)
      
       omega.vec.1 <- predict(zeta.fit, newdata = data.frame(alpha = new.alpha.1), type = "response")
@@ -168,12 +173,14 @@ deconvolute_sample_weighted <- function(sample.pat.path,
       mad.0[i.iter] = mean(abs(alpha.old.0 - new.alpha.0))/mean(new.alpha.0)      
      
       alpha = new.alpha
+      alpha.1 = new.alpha.1
+      alpha.0 = new.alpha.0
       
       all.alphas.1[[i.iter]] <- alpha.1
       all.alphas.0[[i.iter]] <- alpha.0
       all.alphas[[i.iter]] <- alpha
       
-      mad = c(mad.1, mad.0)
+      mad = list(mad.1, mad.0)
     }
     return(list(last_alpha = alpha, iter_mad = mad))
   }, cl = n_threads)

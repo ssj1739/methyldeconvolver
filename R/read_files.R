@@ -42,7 +42,7 @@ read_pat <- function(path="data/Hep_all.pat.gz", linelimit = Inf, verbose = F){
 #' @param path 
 #' @param chunksize 
 #'
-#' @return
+#' @return data.frame containing contents of pat file
 #'
 #' @examples
 #' \dontrun{
@@ -65,8 +65,8 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 
 #' read_marker
 #'
-#' @param path 
-#' @param linelimit 
+#' @param path character indicating path to PAT file. May be gzipped.
+#' @param linelimit numeric. Default Inf.
 #'
 #' @return data.frame containing marker file contents
 #' @export

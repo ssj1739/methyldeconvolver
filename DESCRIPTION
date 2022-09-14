@@ -1,7 +1,7 @@
 Package: methyldeconvolveR
 Type: Package
 Title: Reference-based deconvolution of tissues using DNA methylation
-Version: 0.2.1
+Version: 0.2.2
 Authors@R: 
   c(
     person("Sidharth Singh", "Jain", email = "sidharthsjain@gmail.com", role = c("aut","cre"), comment = c("ORCID" = "0000-0000-0000-0000")), 

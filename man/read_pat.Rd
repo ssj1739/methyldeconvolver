@@ -19,3 +19,8 @@ data.frame containing contents of pat file.
 \description{
 read_pat
 }
+\examples{
+\dontrun{
+read_pat(path = "path/to/pat_file.pat.gz")
+}
+}

@@ -20,8 +20,8 @@ true_prop <- count_distr / sum(count_distr)
 true_prop <- true_prop[sort(names(true_prop))]
 print(true_prop)
 
-res_unweighted <- deconvolute_sample(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", apply_weighting = F, reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
-res_weighted <- deconvolute_sample(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", apply_weighting = T, reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
+res_unweighted <- deconvolute_sample(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
+res_weighted <- deconvolute_sample_weighted(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
 
 
 lapply(res_unweighted, function(x){

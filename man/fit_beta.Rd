@@ -19,3 +19,8 @@ beta params for each marker region using stats::optim
 fit_beta
 Fits a beta distribution to given methylation signals from sample pat file
 }
+\examples{
+\dontrun{
+fit_beta(overlaps.list)
+}
+}

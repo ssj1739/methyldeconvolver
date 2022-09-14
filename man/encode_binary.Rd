@@ -9,6 +9,9 @@ encode_binary(read)
 \arguments{
 \item{read}{string of DNA methylation read (containing T and C)}
 }
+\value{
+integer vector
+}
 \description{
 Given a string of T and C, calculates the binary representation of that methylation.
 0 represents non-methylated cytosines, and 1 represents methylated cytosines (converted to T)

@@ -8,6 +8,7 @@ deconvolute_sample_weighted(
   sample.pat.path,
   reference,
   verbose = F,
+  weighting_n_sigma = 3,
   num_of_inits = 10,
   max_iter = 100,
   n_threads = 1

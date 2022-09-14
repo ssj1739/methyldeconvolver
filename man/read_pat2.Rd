@@ -2,7 +2,8 @@
 % Please edit documentation in R/read_files.R
 \name{read_pat2}
 \alias{read_pat2}
-\title{read_pat2}
+\title{read_pat2
+Meant to be a more efficient way to stream in large pat files. Still not ready for export.}
 \usage{
 read_pat2(path = "data/Hep_all.pat.gz", chunksize = 5000)
 }
@@ -13,4 +14,10 @@ read_pat2(path = "data/Hep_all.pat.gz", chunksize = 5000)
 }
 \description{
 read_pat2
+Meant to be a more efficient way to stream in large pat files. Still not ready for export.
+}
+\examples{
+\dontrun{
+read_pat2(path = "path/to/pat_file.pat.gz")
+}
 }

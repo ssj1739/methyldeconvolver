@@ -2,7 +2,14 @@
 #'
 #' @param sample.pat.path 
 #' @param reference 
+#' @param verbose logical, should messages be outputted to console? Default is False.
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
+#' @param max_iter numeric - how many iterations of EM should be the maximum (Default is 100 - convergence usually achieved before this)
+#' @param n_threads numeric - how many cores can be used to parallelize? See details.
+#' 
+#' @details For parallelization, the \link[pbapply] package is used to speed up computations.
+#' Each initialization is sent to a different core for processing, but the EM itself occurs on a single core.
+#' To speed up processing with a single core, fewer initialization can be set.
 #'
 #' @return list of alpha from each initialization.
 #' @export
@@ -104,15 +111,13 @@ deconvolute_sample <- function(sample.pat.path,
       transpose_prod <- sweep(psi.mat, MARGIN = 2, alpha.old, '*')
       phi <- transpose_prod/rowSums(transpose_prod)
 
-      cs = colSums(phi * sample.pat$nobs[omp$overlaps@from])
-      new.alpha <- cs / sum(cs)
-
       # Calculate new alpha
       cs = colSums(phi * sample.pat$nobs[omp$overlaps@from])
       new.alpha <- cs / sum(cs)
-      # 
       
+      # Increment iteration
       i.iter = i.iter + 1
+      
       # Check our threshold of mad
       mad[i.iter] = mean(abs(alpha.old - new.alpha))/mean(new.alpha)
       alpha = new.alpha
