@@ -22,12 +22,23 @@
 deconvolute_sample <- function(sample.pat.path, 
                                reference, 
                                verbose = F, 
+                               retain_alphas = F,
                                num_of_inits = 10, max_iter = 100,
                                n_threads = 1){
   # LOAD LIBRARIES
   require(pbapply)
+  require(stats)
   
   # TODO: VALIDATE PARAMS
+  if(max_iter <= 1 & !is.integer(max_iter)){
+    stop("\nNumber of maximum iterations must be integer greater than 1")
+  }
+  if(num_of_inits < 1 & !is.integer(num_of_inits)){
+    stop("\nNumber of initializations must be an integer greater than 0")
+  }
+  if(n_threads > parallel::detectCores()){
+    message(paste0("Max number of threads detected is ", parallel::detectCores(), ". Using that number instead."))
+  }
   
   if(verbose) message("Reading and aligning PAT file to marker reference.")
   # Read and validate PAT file
@@ -78,7 +89,7 @@ deconvolute_sample <- function(sample.pat.path,
   if(verbose)
     on.exit(pbapply::closepb(pb))
   
-  if(verbose) message("Performing EM")
+  if(verbose) message("\nPerforming EM")
   
   ### Set different random uniform priors based on the number of initializations specified by user 
   num_celltypes <- length(unique(reference$marker$target))
@@ -96,9 +107,6 @@ deconvolute_sample <- function(sample.pat.path,
   ### Update alpha to calculate cell type proportions
   updated_alphas <- pbapply::pblapply(alpha.inits, function(alpha){
     i.iter = 1
-    if(max_iter <= i.iter){
-      stop("Number of maximum iterations must be greater than 1")
-    }
     mad = vector()
     mad[1] <- 1
     all.alphas <- list()
@@ -123,8 +131,15 @@ deconvolute_sample <- function(sample.pat.path,
       alpha = new.alpha
       all.alphas[[i.iter]] <- alpha
     }
-    return(list(last_alpha = alpha, iter_mad = mad))
+    output = list(last_alpha = alpha, iter_mad = mad)
+    
+    if(retain_alphas)
+      output$all_alphas <- all.alphas
+    
+    return(output)
   }, cl = n_threads)
+  
+  updated_alphas[[1]]$last_alpha
   
   return(updated_alphas)
 }

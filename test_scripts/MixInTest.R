@@ -20,7 +20,7 @@ true_prop <- count_distr / sum(count_distr)
 true_prop <- true_prop[sort(names(true_prop))]
 print(true_prop)
 
-res_unweighted <- deconvolute_sample(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
+res_unweighted <- deconvolute_sample(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", retain_alphas = T, reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
 res_weighted <- deconvolute_sample_weighted(sample.pat.path = "data/FullTest/test_mix_1.pat.gz", reference = ref, verbose = T, n_threads = 6, num_of_inits = 100)
 
 
@@ -76,3 +76,24 @@ ggplot(res_df_clean, aes(x = cell_types, y = Proportions, color = Estimate)) +
   geom_boxplot()
 
 ggsave(filename = "figs/MixIn_WeightedvsUnweighted.png", width = 8, height = 5, dpi = 300)
+
+mad_unweighted_df = as.data.frame(res_unweighted[[1]]$iter_mad) %>%
+  magrittr::set_colnames("MAD_value") %>%
+  mutate(iteration = 1:nrow(.))
+
+ggplot(mad_unweighted_df, aes(x = iteration, y = MAD_value)) +
+  geom_point()
+
+ggsave("mad_unweighted.png", width = 7, height = 4)
+
+
+mad_weighted_df = as.data.frame(res_weighted[[1]]$iter_mad) %>%
+  magrittr::set_colnames(c("mad.1", "mad.0")) %>%
+  mutate(iteration = 1:nrow(.)) %>%
+  pivot_longer(cols = c(mad.1, mad.0), names_to = "MAD_label", values_to = "MAD_value")
+
+ggplot(mad_weighted_df, aes(x = iteration, y = MAD_value, color = MAD_label)) +
+  geom_point() +
+  facet_wrap(~MAD_label, nrow = 2)
+
+ggsave("mad_weighted.png", width = 7, height = 7)

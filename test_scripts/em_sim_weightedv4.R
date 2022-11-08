@@ -39,7 +39,6 @@ true_alpha$cell_idx <- as.factor(true_alpha$cell_idx)
 n.iters <- 100
 n.trials <- 6
 
-
 trial_output <- pblapply(1:n.trials, function(trial){ # Loop through multiple trials with varying amounts of noise
   zeta0 = -2
   zeta1 = 5*trial

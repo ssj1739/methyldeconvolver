@@ -86,7 +86,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
   pat.ranges <- overlaps.list$pat.gr
   
   if(verbose)
-    message("Learning beta distr. parameters.")
+    message("Learning beta distribution parameters.")
   
   beta_fits <- lapply(1:length(overlaps.list$marker.gr), function(x){
     pat.index <- marker.pat.overlaps@from[marker.pat.overlaps@to == x]

@@ -4,6 +4,10 @@
 #' @param path character indicating path to PAT file. May be gzipped.
 #' @param linelimit numeric. Default Inf.
 #' @param verbose logical. Default FALSE.
+#' 
+#' @description
+#' Reads in PAT-format files (output from wgbstools). 
+#' Also includes 
 #'
 #' @return data.frame containing contents of pat file.
 #' @export
@@ -12,24 +16,33 @@
 #' \dontrun{
 #' read_pat(path = "path/to/pat_file.pat.gz")
 #' }
-read_pat <- function(path="data/Hep_all.pat.gz", linelimit = Inf, verbose = F){
+read_pat <- function(path="data/ref/Hep_all.pat.gz", 
+                     linelimit = Inf,
+                     filter = F,
+                     verbose = F){
   require(data.table)
   require(dplyr)
   if(verbose) message("Starting to read file.")
-  pat = data.table::fread(path, nrows = linelimit, header = F)
+  pat = data.table::fread(file = path, nrows = linelimit, header = F)
   colnames(pat)[1:4] <- c("chr", "start", "read", "nobs")
   # Filter for read requirements:
   # - Must have at least 1 C or T
   # - Must be of length 3 or more
   if(verbose)
     message("Finished reading, now filtering.")
-  pat.filt <- pat %>%
-    dplyr::filter(nchar(read) >= 3) %>%
-    dplyr::filter(grepl("C|T", read))
+  
+  if(isFALSE(filter)){
+    pat.filt <- pat
+  }else{
+    pat.filt <- pat %>%
+      dplyr::filter(nchar(read) >= 3) %>%
+      dplyr::filter(grepl("C|T", read))
+  }
+  
   
   if(verbose){
     message("Finished filtering.")
-    message(paste0("Filtered out ", nrow(pat) - nrow(pat.filt), " rows"))
+    message(paste0("Filtered out ", nrow(pat) - nrow(pat.filt), " reads."))
   }
     
   

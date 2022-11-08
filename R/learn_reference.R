@@ -42,7 +42,16 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   
   # Return reference format, with markers and shape params/beta.f for each celltype
   marker.subset <- marker %>%
-    select(chr, startCpG, endCpG)
+    select(chr, startCpG, endCpG, target)
+  
+  bad.markers <- c()
+  for(cell_type in names(beta_celltype_fits)){
+  
+    beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
+    bad.markers <- c(bad.markers, beta_celltype_fits_subset$marker.index[beta_celltype_fits_subset$psi.init==0])
+  }
+  bad.markers <- unique(bad.markers)
+  
   
   output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
   

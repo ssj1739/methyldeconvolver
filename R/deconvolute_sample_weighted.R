@@ -21,6 +21,7 @@ deconvolute_sample_weighted <- function(sample.pat.path,
                                verbose = F,
                                weighting_n_sigma = 3,
                                num_of_inits = 10, max_iter = 100,
+                               retain_alphas = F,
                                n_threads = 1){
   # LOAD LIBRARIES
   require(pbapply)
@@ -130,7 +131,7 @@ deconvolute_sample_weighted <- function(sample.pat.path,
     tol = 1e-3
     alpha.1 = alpha
     alpha.0 = alpha
-    while(i.iter < max_iter & mad.1[i.iter] > tol & mad.0[i.iter] > tol){
+    while(!(i.iter > max_iter) | !(mad.1[i.iter] < tol & mad.0[i.iter] < tol)){
       # Save old alpha
       alpha.old = alpha
 
@@ -180,9 +181,14 @@ deconvolute_sample_weighted <- function(sample.pat.path,
       all.alphas.0[[i.iter]] <- alpha.0
       all.alphas[[i.iter]] <- alpha
       
-      mad = list(mad.1, mad.0)
+      mad = list(mad.1 = mad.1, mad.0 = mad.0)
     }
-    return(list(last_alpha = alpha, iter_mad = mad))
+    output = list(last_alpha = alpha, iter_mad = mad)
+    
+    if(retain_alphas)
+      output$all_alphas <- all_alphas
+    
+    return(output)
   }, cl = n_threads)
   
   return(updated_alphas)
