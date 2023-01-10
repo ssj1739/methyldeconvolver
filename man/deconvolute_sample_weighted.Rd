@@ -11,6 +11,7 @@ deconvolute_sample_weighted(
   weighting_n_sigma = 3,
   num_of_inits = 10,
   max_iter = 100,
+  retain_alphas = F,
   n_threads = 1
 )
 }
@@ -19,7 +20,15 @@ deconvolute_sample_weighted(
 
 \item{reference}{- ref object outputted by \link{learn_reference}}
 
+\item{verbose}{logical - default False}
+
+\item{weighting_n_sigma}{numeric - how many st. devs. away from mean should reads be downweighted?}
+
 \item{num_of_inits}{numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).}
+
+\item{max_iter}{integer - maximum number of iterations for EM step}
+
+\item{n_threads}{integer - number of threads to}
 }
 \value{
 list of alpha from each initialization.

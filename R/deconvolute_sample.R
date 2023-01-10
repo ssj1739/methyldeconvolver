@@ -1,15 +1,24 @@
 #' deconvolution step
 #'
-#' @param sample.pat.path 
-#' @param reference 
-#' @param verbose logical, should messages be outputted to console? Default is False.
-#' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
-#' @param max_iter numeric - how many iterations of EM should be the maximum (Default is 100 - convergence usually achieved before this)
-#' @param n_threads numeric - how many cores can be used to parallelize? See details.
+#' @param sample_pat_path Path to sample PAT file (output from wgbstools)
+#' @param reference Output from \code{\link{learn_reference}} function.
+#' @param quiet logical, should output be delivered silently? Default is FALSE.
+#' @param num_of_inits numeric - how many random prior initializations to set 
+#' for the EM approach. Default is 1 (uniform prior).
+#' @param retain_alphas
+#' @param output_format Default is "all". Change to "simple" for only named vector 
+#' of proportion estimates
+#' @param max_iter numeric - how many iterations of EM should be the maximum 
+#' (Default is 100 - convergence usually achieved before this)
+#' @param n_threads numeric - how many threads/cores can be used to parallelize? 
+#' See details.
 #' 
-#' @details For parallelization, the \link[pbapply] package is used to speed up computations.
-#' Each initialization is sent to a different core for processing, but the EM itself occurs on a single core.
-#' To speed up processing with a single core, fewer initialization can be set.
+#' @details The \link[pbapply]{pbapply} function is used to speed up 
+#' computations.
+#' Each initialization is sent to a different core for processing, but the EM 
+#' itself occurs on a single core.
+#' To speed up processing with a single core, 
+#' fewer initialization can be set.
 #'
 #' @return list of alpha from each initialization.
 #' @export
@@ -17,41 +26,59 @@
 #' @examples
 #' \dontrun{
 #' ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
-#' deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+#' deconvolute_sample_weighted(sample_pat_path = "sample_to_deconvolute.pat.gz", reference = ref)
 #' }
-deconvolute_sample <- function(sample.pat.path, 
+deconvolute_sample <- function(sample_pat, 
                                reference, 
-                               verbose = F, 
+                               quiet = F, 
                                retain_alphas = F,
+                               output_format = "all",
                                num_of_inits = 10, max_iter = 100,
+                               calculate_confidence_int = NA,
                                n_threads = 1){
   # LOAD LIBRARIES
   require(pbapply)
   require(stats)
   
-  # TODO: VALIDATE PARAMS
-  if(max_iter <= 1 & !is.integer(max_iter)){
+  # TODO: VALIDATE ALL PARAMS
+  if(max_iter <= 1 & !is.integer(max_iter))
     stop("\nNumber of maximum iterations must be integer greater than 1")
-  }
-  if(num_of_inits < 1 & !is.integer(num_of_inits)){
+  if(num_of_inits < 1 & !is.integer(num_of_inits))
     stop("\nNumber of initializations must be an integer greater than 0")
-  }
+  if(!file.exists(sample_pat_path))
+    stop("\nNo such PAT file exists.")
   if(n_threads > parallel::detectCores()){
-    message(paste0("Max number of threads detected is ", parallel::detectCores(), ". Using that number instead."))
+    if(!quiet) message(paste0("Max number of threads detected is ", 
+                              parallel::detectCores(), 
+                              ". Using one less than that number instead."))
+    n_threads <- parallel::detectCores()-1
+  }
+  if(.Platform$OS.type!="unix"){
+    n_threads <- 1
+    if(!quiet) message("To use multi-core capability of pbapply,
+                       UNIX-like systems like Linux or macOS must be used. Changing number of threads to 1.")
   }
   
-  if(verbose) message("Reading and aligning PAT file to marker reference.")
+  if(!quiet) message("Reading and aligning PAT file to marker reference.")
   # Read and validate PAT file
-  sample.pat <- read_pat(path = sample.pat.path)
+  if(!is.data.frame(sample_pat)){
+    sample_pat <- try({
+        read_pat(path = sample_pat)
+    }, silent = T)
+    if(!is.data.frame){
+      stop("Unable to read sample pat file. Please provide valid data.frame or path to pat file.")
+    }
+  }
   # Align markers to reads on PAT file
-  omp <- overlap_marker_pat(pat = sample.pat, marker = reference$marker)
+  omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker)
   
-  if(verbose) message("Computing psi matrix...")
+  if(!quiet) message("Computing psi matrix...")
   
   # Compute psi value for each read, and create new psi matrix
   psi.mat <- matrix(nrow = length(omp$overlaps), ncol = length(reference$beta_celltype_fits), dimnames = list(c(), names(reference$beta_celltype_fits)))
  
-  if(verbose)
+  # Add progress bar for interactive runs
+  if(!quiet)
     pb <- pbapply::startpb(min = 0, max = length(omp$overlaps))
   for(i in 1:length(omp$overlaps)){
     # Calculate r
@@ -83,13 +110,13 @@ deconvolute_sample <- function(sample.pat.path,
     # Output updated psi value into psi.mat
     psi.mat[i,] <- psi.vec
     
-    if(verbose)
+    if(!quiet)
       pbapply::setpb(pb = pb, value = i)
   }
-  if(verbose)
+  if(!quiet)
     on.exit(pbapply::closepb(pb))
   
-  if(verbose) message("\nPerforming EM")
+  if(!quiet) message("\nPerforming EM")
   
   ### Set different random uniform priors based on the number of initializations specified by user 
   num_celltypes <- length(unique(reference$marker$target))
@@ -120,7 +147,7 @@ deconvolute_sample <- function(sample.pat.path,
       phi <- transpose_prod/rowSums(transpose_prod)
 
       # Calculate new alpha
-      cs = colSums(phi * sample.pat$nobs[omp$overlaps@from])
+      cs = colSums(phi * sample_pat$nobs[omp$overlaps@from])
       new.alpha <- cs / sum(cs)
       
       # Increment iteration
@@ -131,7 +158,10 @@ deconvolute_sample <- function(sample.pat.path,
       alpha = new.alpha
       all.alphas[[i.iter]] <- alpha
     }
-    output = list(last_alpha = alpha, iter_mad = mad)
+    
+    ll = likelihood_fun(psi = psi.mat, alpha = alpha)
+    
+    output = list(last_alpha = alpha, iter_mad = mad, loglik = ll)
     
     if(retain_alphas)
       output$all_alphas <- all.alphas
@@ -139,7 +169,25 @@ deconvolute_sample <- function(sample.pat.path,
     return(output)
   }, cl = n_threads)
   
-  updated_alphas[[1]]$last_alpha
+  max_ll <- which.max(sapply(updated_alphas, `[[`, "loglik"))
   
-  return(updated_alphas)
+  if(!is.na(calculate_confidence_int)){
+    if(!is.numeric(calculate_confidence_int) | calculate_confidence_int > 1 | calculate_confidence_int < 0)
+      message("Confidence interval specified is invalid. Please specify a numeric confidence interval between 0 and 1.")
+    else{
+      alpha = 1-calculate_confidence_int
+      n.boots = 10000 # TODO: Set as parameter
+      boot_output <- pbapply::pblapply(1:n.boots, function(x){
+        ii = sample(1:nrow(sample_pat), replace = T)
+        boot_pat <- sample_pat[ii,]
+        
+        boot_res <- deconvolute_sample(sample_pat = boot_pat, reference = reference, quiet = T, num_of_inits = 10, n_threads = 1, retain_alphas = F, output_format = 'simple', calculate_confidence_int = NA)
+        return(boot_res)
+      }, cl = 8)
+}
+  }
+  if(output_format=="simple")
+    return(updated_alphas[[max_ll]]$last_alpha)
+  else
+    return(updated_alphas[[max_ll]])
 }

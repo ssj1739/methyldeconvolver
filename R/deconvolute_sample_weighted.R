@@ -5,8 +5,8 @@
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
 #' @param weighting_n_sigma numeric - how many st. devs. away from mean should reads be downweighted?
 #' @param verbose logical - default False
-#' @param max_iter
-#' @param n_threads
+#' @param max_iter integer - maximum number of iterations for EM step
+#' @param n_threads integer - number of threads to 
 #'
 #' @return list of alpha from each initialization.
 #' @export

@@ -18,7 +18,7 @@
 #' }
 read_pat <- function(path="data/ref/Hep_all.pat.gz", 
                      linelimit = Inf,
-                     filter = F,
+                     filter = T,
                      verbose = F){
   require(data.table)
   require(dplyr)
@@ -90,8 +90,11 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' }
 read_marker <- function(path="data/Human_mixintest_top25.txt", linelimit = Inf){
   require(data.table)
-  marker = data.table::fread(path, nrows = linelimit, header = T)
-  
+  marker = data.table::fread(path, nrows = linelimit, header = F)
+  if(!grepl("[1-9]",marker[1,1])){
+    marker <- marker[2:nrow(marker),]
+  }
+  colnames(marker)[1:8] <- c("chr", "start", "end", "startCpG", "endCpG", "target", "name", "direction")
   # TODO: Valudate marker file format
   
   return(marker)

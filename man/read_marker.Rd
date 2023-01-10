@@ -7,9 +7,9 @@
 read_marker(path = "data/Human_mixintest_top25.txt", linelimit = Inf)
 }
 \arguments{
-\item{path}{}
+\item{path}{character indicating path to PAT file. May be gzipped.}
 
-\item{linelimit}{}
+\item{linelimit}{numeric. Default Inf.}
 }
 \value{
 data.frame containing marker file contents

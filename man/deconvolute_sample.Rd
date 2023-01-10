@@ -7,7 +7,8 @@
 deconvolute_sample(
   sample.pat.path,
   reference,
-  verbose = F,
+  quiet = F,
+  retain_alphas = F,
   num_of_inits = 10,
   max_iter = 100,
   n_threads = 1
@@ -18,13 +19,30 @@ deconvolute_sample(
 
 \item{reference}{}
 
-\item{num_of_inits}{numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).}
+\item{quiet}{logical, should output be delivered silently? Default is FALSE.}
+
+\item{num_of_inits}{numeric - how many random prior initializations to set 
+for the EM approach. Default is 1 (uniform prior).}
+
+\item{max_iter}{numeric - how many iterations of EM should be the maximum 
+(Default is 100 - convergence usually achieved before this)}
+
+\item{n_threads}{numeric - how many threads/cores can be used to parallelize? 
+See details.}
 }
 \value{
 list of alpha from each initialization.
 }
 \description{
 deconvolution step
+}
+\details{
+For parallelization, the \link[pbapply] package is used to speed up 
+computations.
+Each initialization is sent to a different core for processing, but the EM 
+itself occurs on a single core.
+To speed up processing with a single core, 
+fewer initialization can be set.
 }
 \examples{
 \dontrun{

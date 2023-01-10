@@ -2,6 +2,7 @@
 library(pbapply)
 library(reshape2)
 library(dbplyr)
+library(tidyverse)
 
 #functions
 encode_binary <- function(read){
@@ -167,7 +168,6 @@ alpha.inits <- lapply(1:num_of_inits, function(x){
   return(alpha)
 })
 
-
 unweighted.alphas <- pblapply(alpha.inits, function(alpha.i){
   # Update alpha
   max.iter = 100
@@ -202,11 +202,17 @@ return(c("rmse" = caret::RMSE(unweighted.alphas[[1]], obs = true_alpha[,"alpha"]
          "est_alpha"= list("unweighted.alphas" = unweighted.alphas[[1]])))
 
 ##Bootstrap SE & CI
+
+# Inputs into bootstrap
+# n.boots
+# sample pat
+
+
 n.boots <- 1000 #user input, should default to 10,000 but takes a long time
 
 boot_output <- pblapply(1:n.boots, function(boot.sample){ # Loop through multiple bootstrap samples to compute SE
   #Sample boot.sample from sim_pat file  
-  boot.sample <- sim_pat %>% slice_sample(n= num_reads, replace=TRUE)
+  boot.sample <- sim_pat %>% slice_sample(n = num_reads, replace = TRUE)
     
     #Run Deconvolution on boot.sample
     ### EM Deconvolution

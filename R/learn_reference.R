@@ -4,12 +4,17 @@
 #' @description Learn a reference set from given reference pat files of cell types of interest.
 #'
 #' @param marker.file Path to marker file
-#' @param pat.dir Path to directory containing reference pat files
+#' @param pat.dir Path to directory containing reference pat files. See notes.
 #' @param save.output character - desired path to output reference, saved as serialized R object (.rds)
 #'
 #' @return reference object
 #' @export
 #'
+#' @note Name formats of the reference PAT files should follow the following convention:
+#' - Files should end in .pat.gz (bgzipped PAT files outputted from wgbstools).
+#' - Files should have the name of the cell type (which perfectly matches the name in the marker file) 
+#' followed by an underscore, followed by any other names.
+#' e.g. Bcell_1000_ExampleCellGeneratedInHouse.pat.gz
 #' @examples
 #' \dontrun{
 #' learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
@@ -22,22 +27,39 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   
   # Identify # of Pat files in pat.dir, ensure correct formats
   pat.files = dir(pattern = "*.pat*", pat.dir, full.names = F)
+  pat.cell_types <- sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1])
+  
+  # Verify that all PAT file cell types are contained in the marker file "targets" column
+  missing_pats <- which(!tolower(pat.cell_types) %in% tolower(marker$target)) # Use `tolower` to normalize case mismatch
+  if(length(missing_pats)>0){
+    if(verbose){
+      message("The following PAT files represent cell types not found in the marker file:")
+      cat(pat.files[missing_pats], sep = '\n')
+    }
+    # Remove PAT files without a matching target cell type
+    pat.files <- pat.files[-missing_pats]
+    pat.cell_types <- pat.cell_types[-missing_pats]
+  }
   
   # Loop through each pat file in directory
   if(verbose) message("Starting to loop through pat files:")
   beta_celltype_fits <- list()
   pat.num <- 1
-  for(pf in pat.files){
-    if(verbose) message(paste0("Reading ", pat.num, " of ", length(pat.files), " PAT files"))
-    pat <- read_pat(path = paste0(pat.dir,"/",pf), verbose = verbose)
-    pat.num <- pat.num+1
-    
-    if(verbose) message("Checking overlap of ", pf)
-    overlap <- overlap_marker_pat(pat = pat, marker = marker)
-    
-    if(verbose) message("Fitting beta distributions.")
-    pf_name <- tolower(strsplit(pf, split = ".pat", fixed = T)[[1]][1])
-    beta_celltype_fits[[pf_name]] <- fit_beta(overlaps.list = overlap)
+  for(pc in pat.cell_types){
+    if(verbose(paste0("Reading PAT files from ", pc, " cell-type.")))
+    pc_pat.files <- pat.files[pat.cell_types == pc]
+    for(pf in pc_pat.files){
+      if(verbose) message(paste0("Reading ", pat.num, " of ", length(pat.files), " PAT files"))
+      pat <- read_pat(path = paste0(pat.dir,"/",pf), verbose = verbose)
+      pat.num <- pat.num+1
+      
+      if(verbose) message("Checking overlap of ", pf)
+      overlap <- overlap_marker_pat(pat = pat, marker = marker)
+      
+      if(verbose) message("Fitting beta distributions.")
+      pf_name <- tolower(strsplit(pf, split = ".pat", fixed = T)[[1]][1])
+      beta_celltype_fits[[pf_name]] <- fit_beta(overlaps.list = overlap)
+    }
   }
   
   # Return reference format, with markers and shape params/beta.f for each celltype

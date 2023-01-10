@@ -4,10 +4,9 @@
 #' @param alpha cell type proportions (same length as ncol(alpha))
 #' @param epsilon pseudo-probability of psi in case psi = 0
 #'
-#' @return
+#' @return log-likelihood of input alpha value
 #' @export
 #'
-#' @examples
 likelihood_fun <- function(psi, alpha, epsilon = 1e-7){
   stopifnot(length(alpha) == ncol(psi))
   
