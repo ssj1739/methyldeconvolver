@@ -27,7 +27,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   
   # Identify # of Pat files in pat.dir, ensure correct formats
   pat.files = dir(pattern = "*.pat*", pat.dir, full.names = F)
-  pat.cell_types <- sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1])
+  pat.cell_types <- tolower(sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1]))
   
   # Verify that all PAT file cell types are contained in the marker file "targets" column
   missing_pats <- which(!tolower(pat.cell_types) %in% tolower(marker$target)) # Use `tolower` to normalize case mismatch
@@ -44,22 +44,30 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   # Loop through each pat file in directory
   if(verbose) message("Starting to loop through pat files:")
   beta_celltype_fits <- list()
-  pat.num <- 1
-  for(pc in pat.cell_types){
-    if(verbose(paste0("Reading PAT files from ", pc, " cell-type.")))
+  
+  cell_type.num <- 1
+  for(pc in unique(pat.cell_types)){
+    if(verbose) message(paste0("Reading PAT files from cell-type: ", pc, "; ", cell_type.num, " out of ", length(unique(pat.cell_types))))
     pc_pat.files <- pat.files[pat.cell_types == pc]
+    pc_pat.list <- list()
+    pat.num <- 1
     for(pf in pc_pat.files){
-      if(verbose) message(paste0("Reading ", pat.num, " of ", length(pat.files), " PAT files"))
+      if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
       pat <- read_pat(path = paste0(pat.dir,"/",pf), verbose = verbose)
       pat.num <- pat.num+1
-      
-      if(verbose) message("Checking overlap of ", pf)
-      overlap <- overlap_marker_pat(pat = pat, marker = marker)
-      
-      if(verbose) message("Fitting beta distributions.")
-      pf_name <- tolower(strsplit(pf, split = ".pat", fixed = T)[[1]][1])
-      beta_celltype_fits[[pf_name]] <- fit_beta(overlaps.list = overlap)
+      pc_pat.list[[pf]] <- pat
     }
+    
+    pc_pat.merged <- bind_rows(pc_pat.list)
+      
+    if(verbose) message("Checking overlap of PAT files from ", pc)
+    overlap <- overlap_marker_pat(pat = pc_pat.merged, marker = marker)
+      
+    if(verbose) message("Fitting beta distributions.")
+    beta_celltype_fits[[pc]] <- fit_beta(overlaps.list = overlap)
+    cell_type.num <- cell_type.num + 1
+    rm(pc_pat.merged, overlap)
+    gc(full = T)
   }
   
   # Return reference format, with markers and shape params/beta.f for each celltype

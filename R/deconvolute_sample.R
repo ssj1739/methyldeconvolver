@@ -1,17 +1,18 @@
 #' deconvolution step
 #'
-#' @param sample_pat_path Path to sample PAT file (output from wgbstools)
+#' @param sample_pat Path to sample PAT file (output from wgbstools)
 #' @param reference Output from \code{\link{learn_reference}} function.
-#' @param quiet logical, should output be delivered silently? Default is FALSE.
+#' @param quiet logical - should output be delivered silently? Default is FALSE.
 #' @param num_of_inits numeric - how many random prior initializations to set 
 #' for the EM approach. Default is 1 (uniform prior).
-#' @param retain_alphas
+#' @param retain_alphas logical - should alphas from each iteration be saved? Default is FALSE.
 #' @param output_format Default is "all". Change to "simple" for only named vector 
 #' of proportion estimates
 #' @param max_iter numeric - how many iterations of EM should be the maximum 
 #' (Default is 100 - convergence usually achieved before this)
 #' @param n_threads numeric - how many threads/cores can be used to parallelize? 
 #' See details.
+#' @param calculate_confidence_int numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.
 #' 
 #' @details The \link[pbapply]{pbapply} function is used to speed up 
 #' computations.
@@ -26,7 +27,7 @@
 #' @examples
 #' \dontrun{
 #' ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
-#' deconvolute_sample_weighted(sample_pat_path = "sample_to_deconvolute.pat.gz", reference = ref)
+#' deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
 #' }
 deconvolute_sample <- function(sample_pat, 
                                reference, 
@@ -45,8 +46,11 @@ deconvolute_sample <- function(sample_pat,
     stop("\nNumber of maximum iterations must be integer greater than 1")
   if(num_of_inits < 1 & !is.integer(num_of_inits))
     stop("\nNumber of initializations must be an integer greater than 0")
-  if(!file.exists(sample_pat_path))
-    stop("\nNo such PAT file exists.")
+  if(!is.data.frame(sample_pat)){
+    if(!file.exists(sample_pat))
+      stop("\nNo such PAT file or dataframe exists.")
+  }
+    
   if(n_threads > parallel::detectCores()){
     if(!quiet) message(paste0("Max number of threads detected is ", 
                               parallel::detectCores(), 
@@ -65,7 +69,7 @@ deconvolute_sample <- function(sample_pat,
     sample_pat <- try({
         read_pat(path = sample_pat)
     }, silent = T)
-    if(!is.data.frame){
+    if(!is.data.frame(sample_pat)){
       stop("Unable to read sample pat file. Please provide valid data.frame or path to pat file.")
     }
   }
@@ -176,7 +180,7 @@ deconvolute_sample <- function(sample_pat,
       message("Confidence interval specified is invalid. Please specify a numeric confidence interval between 0 and 1.")
     else{
       alpha = 1-calculate_confidence_int
-      n.boots = 10000 # TODO: Set as parameter
+      n.boots = 10 # TODO: Set as parameter
       boot_output <- pbapply::pblapply(1:n.boots, function(x){
         ii = sample(1:nrow(sample_pat), replace = T)
         boot_pat <- sample_pat[ii,]

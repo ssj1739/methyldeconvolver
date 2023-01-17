@@ -9,7 +9,7 @@ learn_reference(marker.file, pat.dir, save.output = "", verbose = F)
 \arguments{
 \item{marker.file}{Path to marker file}
 
-\item{pat.dir}{Path to directory containing reference pat files}
+\item{pat.dir}{Path to directory containing reference pat files. See notes.}
 
 \item{save.output}{character - desired path to output reference, saved as serialized R object (.rds)}
 }
@@ -18,6 +18,13 @@ reference object
 }
 \description{
 Learn a reference set from given reference pat files of cell types of interest.
+}
+\note{
+Name formats of the reference PAT files should follow the following convention:
+- Files should end in .pat.gz (bgzipped PAT files outputted from wgbstools).
+- Files should have the name of the cell type (which perfectly matches the name in the marker file) 
+followed by an underscore, followed by any other names.
+e.g. Bcell_1000_ExampleCellGeneratedInHouse.pat.gz
 }
 \examples{
 \dontrun{

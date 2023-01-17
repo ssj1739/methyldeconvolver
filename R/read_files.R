@@ -95,7 +95,9 @@ read_marker <- function(path="data/Human_mixintest_top25.txt", linelimit = Inf){
     marker <- marker[2:nrow(marker),]
   }
   colnames(marker)[1:8] <- c("chr", "start", "end", "startCpG", "endCpG", "target", "name", "direction")
-  # TODO: Valudate marker file format
+
+  # Normalize case of target cell types
+  marker$target <- tolower(marker$target)
   
   return(marker)
 }

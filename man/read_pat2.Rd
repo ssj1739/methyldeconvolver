@@ -12,6 +12,9 @@ read_pat2(path = "data/Hep_all.pat.gz", chunksize = 5000)
 
 \item{chunksize}{}
 }
+\value{
+data.frame containing contents of pat file
+}
 \description{
 read_pat2
 Meant to be a more efficient way to stream in large pat files. Still not ready for export.

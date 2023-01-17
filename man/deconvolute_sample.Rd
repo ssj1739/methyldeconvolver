@@ -5,21 +5,26 @@
 \title{deconvolution step}
 \usage{
 deconvolute_sample(
-  sample.pat.path,
+  sample_pat,
   reference,
   quiet = F,
   retain_alphas = F,
+  output_format = "all",
   num_of_inits = 10,
   max_iter = 100,
+  calculate_confidence_int = NA,
   n_threads = 1
 )
 }
 \arguments{
-\item{sample.pat.path}{}
+\item{reference}{Output from \code{\link{learn_reference}} function.}
 
-\item{reference}{}
+\item{quiet}{logical - should output be delivered silently? Default is FALSE.}
 
-\item{quiet}{logical, should output be delivered silently? Default is FALSE.}
+\item{retain_alphas}{logical - should alphas from each iteration be saved? Default is FALSE.}
+
+\item{output_format}{Default is "all". Change to "simple" for only named vector 
+of proportion estimates}
 
 \item{num_of_inits}{numeric - how many random prior initializations to set 
 for the EM approach. Default is 1 (uniform prior).}
@@ -27,8 +32,12 @@ for the EM approach. Default is 1 (uniform prior).}
 \item{max_iter}{numeric - how many iterations of EM should be the maximum 
 (Default is 100 - convergence usually achieved before this)}
 
+\item{calculate_confidence_int}{numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.}
+
 \item{n_threads}{numeric - how many threads/cores can be used to parallelize? 
 See details.}
+
+\item{sample_pat_path}{Path to sample PAT file (output from wgbstools)}
 }
 \value{
 list of alpha from each initialization.
@@ -37,7 +46,7 @@ list of alpha from each initialization.
 deconvolution step
 }
 \details{
-For parallelization, the \link[pbapply] package is used to speed up 
+The \link[pbapply]{pbapply} function is used to speed up 
 computations.
 Each initialization is sent to a different core for processing, but the EM 
 itself occurs on a single core.
@@ -47,6 +56,6 @@ fewer initialization can be set.
 \examples{
 \dontrun{
 ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
-deconvolute_sample_weighted(sample.pat.path = "sample_to_deconvolute.pat.gz", reference = ref)
+deconvolute_sample_weighted(sample_pat_path = "sample_to_deconvolute.pat.gz", reference = ref)
 }
 }
