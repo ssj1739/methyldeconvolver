@@ -5,18 +5,22 @@ pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/P
 marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
 
 #reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T)
-reference <- readRDS("complete_reference_megan_rad_1-11-23.rds")
+reference <- readRDS("data/megan_rad/complete_reference_megan_rad_1-11-23.rds")
 
 pat.files <- dir(pat.dir, full.names = T)
 
-# result_deconv_self <- list()
-# for(pf in pat.files){
-#   res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 1, num_of_inits = 1)
-#   result_deconv_self[[pf]] <- res$last_alpha
-# }
+result_deconv_self <- list()
+pb <- pbapply::startpb(min = 0, max = length(pat.files))
+for(i in seq_along(pat.files)){
+  pf <- pat.files[i]
+  res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 4, num_of_inits = 1)
+  result_deconv_self[[pf]] <- res$last_alpha
+  pbapply::setpb(pb, value = i)
+}
+closepb(pb)
 # saveRDS(result_deconv_self, file = "All_results_full_ref.rds")
 
-result_deconv_self <- readRDS("All_results_full_ref.rds")
+result_deconv_self <- readRDS("data/megan_rad/All_results_full_ref.rds")
 
 pat.cell_types <- sapply(pat.files, function(x){
   s = strsplit(x, split = "/", fixed = T)[[1]]
@@ -24,6 +28,18 @@ pat.cell_types <- sapply(pat.files, function(x){
 })
 result_df <- bind_rows(result_deconv_self, .id = "PAT file")
 result_df$target_cell_type <- pat.cell_types[1:nrow(result_df)]
+
+g1 <- heatmaply::ggheatmap(result_df %>% select(-`PAT file`, -target_cell_type),
+                           row_side_colors = tolower(result_df$target_cell_type),
+                     Rowv = F, Colv = F, 
+                     dendrogram = "row",
+                     showticklabels = c(T, F))
+ggsave(plot = g1, "figs/SelfDeconvolution_heatmap_raw.png", width = 12, height = 6, dpi = 300)
+
+g2 <- heatmaply::ggheatmap(result_df %>% select(-`PAT file`),
+                           showticklabels = c(T, F))
+
+ggsave(plot = g2, "figs/SelfDeconvolution_heatmap_clust.png", width = 12, height = 6, dpi = 300)
 
 markers_per_celltype <- as.data.frame(table(reference$marker$target))
 

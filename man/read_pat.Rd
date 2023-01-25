@@ -7,7 +7,8 @@
 read_pat(
   path = "data/ref/Hep_all.pat.gz",
   linelimit = Inf,
-  filter = T,
+  filter.noninf = T,
+  filter.length = 3,
   verbose = F
 )
 }

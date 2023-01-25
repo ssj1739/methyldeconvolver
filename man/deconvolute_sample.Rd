@@ -17,6 +17,8 @@ deconvolute_sample(
 )
 }
 \arguments{
+\item{sample_pat}{Path to sample PAT file (output from wgbstools)}
+
 \item{reference}{Output from \code{\link{learn_reference}} function.}
 
 \item{quiet}{logical - should output be delivered silently? Default is FALSE.}
@@ -36,8 +38,6 @@ for the EM approach. Default is 1 (uniform prior).}
 
 \item{n_threads}{numeric - how many threads/cores can be used to parallelize? 
 See details.}
-
-\item{sample_pat_path}{Path to sample PAT file (output from wgbstools)}
 }
 \value{
 list of alpha from each initialization.
@@ -56,6 +56,6 @@ fewer initialization can be set.
 \examples{
 \dontrun{
 ref = learn_reference(marker.file = "my_marker_file.txt", pat.dir = "directory/to/patfiles/")
-deconvolute_sample_weighted(sample_pat_path = "sample_to_deconvolute.pat.gz", reference = ref)
+deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
 }
 }

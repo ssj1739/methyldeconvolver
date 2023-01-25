@@ -53,7 +53,10 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
     pat.num <- 1
     for(pf in pc_pat.files){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
-      pat <- read_pat(path = paste0(pat.dir,"/",pf), verbose = verbose)
+      pat <- read_pat(path = paste0(pat.dir,"/",pf), 
+                      verbose = verbose, 
+                      filter.noninf = T, 
+                      filter.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
       pat.num <- pat.num+1
       pc_pat.list[[pf]] <- pat
     }
@@ -76,12 +79,10 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   
   bad.markers <- c()
   for(cell_type in names(beta_celltype_fits)){
-  
     beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
     bad.markers <- c(bad.markers, beta_celltype_fits_subset$marker.index[beta_celltype_fits_subset$psi.init==0])
   }
   bad.markers <- unique(bad.markers)
-  
   
   output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
   

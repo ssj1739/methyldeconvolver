@@ -37,9 +37,12 @@ deconvolute_sample <- function(sample_pat,
                                num_of_inits = 10, max_iter = 100,
                                calculate_confidence_int = NA,
                                n_threads = 1){
-  # LOAD LIBRARIES
-  require(pbapply)
-  require(stats)
+  if(require(pbapply)){
+    xapply <- function(...) pbapply::pblapply(..., cl = n_threads)
+  }else{
+    if(!quiet) warning("pbapply not installed or available. Using base lapply instead.")
+    xapply <- function(...) lapply(...)
+  }
   
   # TODO: VALIDATE ALL PARAMS
   if(max_iter <= 1 & !is.integer(max_iter))
@@ -67,7 +70,7 @@ deconvolute_sample <- function(sample_pat,
   # Read and validate PAT file
   if(!is.data.frame(sample_pat)){
     sample_pat <- try({
-        read_pat(path = sample_pat)
+        read_pat(path = sample_pat, filter.noninf = T, filter.length = 1, verbose = !quiet)
     }, silent = T)
     if(!is.data.frame(sample_pat)){
       stop("Unable to read sample pat file. Please provide valid data.frame or path to pat file.")
@@ -76,28 +79,37 @@ deconvolute_sample <- function(sample_pat,
   # Align markers to reads on PAT file
   omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker)
   
+  # Calculate coverage at each marker region
+  omp$marker.gr$num_of_reads_per_marker <- sapply(1:length(omp$marker.gr), function(i){
+    return(sum(omp$pat.gr$nobs[omp$overlaps@from[omp$overlaps@to==i]]))
+  })
+  
   if(!quiet) message("Computing psi matrix...")
   
   # Compute psi value for each read, and create new psi matrix
-  psi.mat <- matrix(nrow = length(omp$overlaps), ncol = length(reference$beta_celltype_fits), dimnames = list(c(), names(reference$beta_celltype_fits)))
+  #psi.mat <- matrix(nrow = length(omp$overlaps), ncol = length(reference$beta_celltype_fits), dimnames = list(c(), names(reference$beta_celltype_fits)))
  
   # Add progress bar for interactive runs
-  if(!quiet)
-    pb <- pbapply::startpb(min = 0, max = length(omp$overlaps))
-  for(i in 1:length(omp$overlaps)){
+  
+  res <- xapply(seq_along(omp$overlaps), function(i){
     # Calculate r
     r.vec = encode_binary(omp$pat.gr$read[omp$overlaps@from[i]])
     
     # Extract shape1, shape2, and beta.f for each marker that's associated with the ith read
     # Length of each of these vectors is the # of cell types
-    shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[x$marker.index==omp$overlaps@to[i]]))
-    shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[x$marker.index==omp$overlaps@to[i]]))
-    beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[x$marker.index==omp$overlaps@to[i]]))
-    psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[x$marker.index==omp$overlaps@to[i]])))
+    
+    # shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[x$marker.index==omp$overlaps@to[i]]))
+    # shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[x$marker.index==omp$overlaps@to[i]]))
+    # beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[x$marker.index==omp$overlaps@to[i]]))
+    # psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[x$marker.index==omp$overlaps@to[i]])))
+    shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[omp$overlaps@to[i]]))
+    shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[omp$overlaps@to[i]]))
+    beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[omp$overlaps@to[i]]))
+    psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[omp$overlaps@to[i]])))
     meth.frac = sum(r.vec) / length(r.vec)
     
     # For all cell types, iterate through each cell type c
-    for(c in 1:length(psi.vec)){
+    for(c in seq_along(psi.vec)){
       if(psi.vec[c]!=0){
         #P = dbinom(x = sum(r.vec), size = length(r.vec), prob = meth.frac[[c]])
         
@@ -112,18 +124,62 @@ deconvolute_sample <- function(sample_pat,
       }
     }
     # Output updated psi value into psi.mat
-    psi.mat[i,] <- psi.vec
-    
-    if(!quiet)
-      pbapply::setpb(pb = pb, value = i)
-  }
-  if(!quiet)
-    on.exit(pbapply::closepb(pb))
+  #  psi.mat[i,] <- psi.vec
+    return(list(psi.vec = psi.vec, shape1 = shape1, shape2 = shape2, beta.f = beta.f, meth.frac = meth.frac))
+  })
+  
+  psi.mat <- lapply(res, '[[', "psi.vec") %>% 
+    dplyr::bind_rows() %>% 
+    as.matrix()
+  
+  # if(!quiet)
+  #   pb <- pbapply::startpb(min = 0, max = length(omp$overlaps))
+  # for(i in seq_along(omp$overlaps)){
+  #   # Calculate r
+  #   r.vec = encode_binary(omp$pat.gr$read[omp$overlaps@from[i]])
+  #   
+  #   # Extract shape1, shape2, and beta.f for each marker that's associated with the ith read
+  #   # Length of each of these vectors is the # of cell types
+  # 
+  #   # shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[x$marker.index==omp$overlaps@to[i]]))
+  #   # shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[x$marker.index==omp$overlaps@to[i]]))
+  #   # beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[x$marker.index==omp$overlaps@to[i]]))
+  #   # psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[x$marker.index==omp$overlaps@to[i]])))
+  #   shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[omp$overlaps@to[i]]))
+  #   shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[omp$overlaps@to[i]]))
+  #   beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[omp$overlaps@to[i]]))
+  #   psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[omp$overlaps@to[i]])))
+  #   meth.frac = sum(r.vec) / length(r.vec)
+  #   
+  #   # For all cell types, iterate through each cell type c
+  #   for(c in seq_along(psi.vec)){
+  #     if(psi.vec[c]!=0){
+  #       #P = dbinom(x = sum(r.vec), size = length(r.vec), prob = meth.frac[[c]])
+  #       
+  #       # For each CpG site r.i in read r (represented in r.vec)
+  #       for(r.i in r.vec){
+  #         # Compute P from the beta function
+  #         P = beta(r.i + shape1[[c]], 1-r.i+shape2[[c]])/beta.f[[c]]
+  #         # Update the psi value for each cell type by multiplying by P
+  #         psi.vec[c] <- psi.vec[c] * P
+  #       }
+  #       psi.vec[c] <- psi.vec[c] * P
+  #     }
+  #   }
+  #   # Output updated psi value into psi.mat
+  #   psi.mat[i,] <- psi.vec
+  #   
+  #   if(!quiet)
+  #     pbapply::setpb(pb = pb, value = i)
+  # }
+  # if(!quiet)
+  #   on.exit(pbapply::closepb(pb))
   
   if(!quiet) message("\nPerforming EM")
   
   ### Set different random uniform priors based on the number of initializations specified by user 
-  num_celltypes <- length(unique(reference$marker$target))
+  # Infer number of reference cell types based on number of reference parameter sets learned from cell types
+  num_celltypes <- length(reference$beta_celltype_fits)
   # Set first prior to uniform prior
   alpha.inits <- lapply(1:(num_of_inits+1), function(x){
     alpha <- stats::runif(num_celltypes)
@@ -136,7 +192,7 @@ deconvolute_sample <- function(sample_pat,
   
   
   ### Update alpha to calculate cell type proportions
-  updated_alphas <- pbapply::pblapply(alpha.inits, function(alpha){
+  updated_alphas <- xapply(alpha.inits, function(alpha){
     i.iter = 1
     mad = vector()
     mad[1] <- 1
@@ -171,7 +227,9 @@ deconvolute_sample <- function(sample_pat,
       output$all_alphas <- all.alphas
     
     return(output)
-  }, cl = n_threads)
+  })
+  
+  output <- list(result = updated_alphas)
   
   max_ll <- which.max(sapply(updated_alphas, `[[`, "loglik"))
   
@@ -179,19 +237,32 @@ deconvolute_sample <- function(sample_pat,
     if(!is.numeric(calculate_confidence_int) | calculate_confidence_int > 1 | calculate_confidence_int < 0)
       message("Confidence interval specified is invalid. Please specify a numeric confidence interval between 0 and 1.")
     else{
-      alpha = 1-calculate_confidence_int
+      alpha = calculate_confidence_int
       n.boots = 10 # TODO: Set as parameter
-      boot_output <- pbapply::pblapply(1:n.boots, function(x){
+      boot_output <- xapply(1:n.boots, function(x){
         ii = sample(1:nrow(sample_pat), replace = T)
         boot_pat <- sample_pat[ii,]
         
         boot_res <- deconvolute_sample(sample_pat = boot_pat, reference = reference, quiet = T, num_of_inits = 10, n_threads = 1, retain_alphas = F, output_format = 'simple', calculate_confidence_int = NA)
         return(boot_res)
-      }, cl = 8)
-}
+      }, cl = n_threads)
+      boot_means <- boot_output %>% bind_rows() %>% summarize(across(everything(), mean)) %>% unlist()
+      boot_sd <- boot_output %>% bind_rows() %>% summarize(across(everything(), sd)) %>% unlist()
+      upper_CI <- boot_means + alpha*(boot_sd/sqrt(n.boots))
+      lower_CI <- boot_means - alpha*(boot_sd/sqrt(n.boots))
+      output$boot_CI <- data.frame(
+        boot_means = boot_means,
+        boot_sd = boot_sd,
+        upper_CI = upper_CI,
+        lower_CI = lower_CI
+      )
+      }
   }
+  output$omp <- omp
   if(output_format=="simple")
-    return(updated_alphas[[max_ll]]$last_alpha)
-  else
-    return(updated_alphas[[max_ll]])
+    return(output$result[[max_ll]]$last_alpha)
+  else{
+    output$best_result <- output$result[[max_ll]]$last_alpha
+    return(output)
+  }
 }
