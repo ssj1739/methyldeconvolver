@@ -39,12 +39,12 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
   # Filtering PAT files by read information (should contain CpG with known methylation status)
   if(isTRUE(filter.noninf)){
     pat.filt <- pat.filt %>%
-      dplyr::filter(grep("C|T", read))
+      dplyr::filter(grepl("C|T", read))
   }
   
   if(verbose){
     message("Finished filtering.")
-    message(paste0("Filtered out ", nrow(pat) - nrow(pat.filt), " reads."))
+    message(paste0("Filtered out ", nrow(pat) - nrow(pat.filt), " reads out of ", nrow(pat), "."))
   }
   
   return(pat.filt)
