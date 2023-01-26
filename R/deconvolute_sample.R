@@ -2,6 +2,7 @@
 #'
 #' @param sample_pat Path to sample PAT file (output from wgbstools)
 #' @param reference Output from \code{\link{learn_reference}} function.
+#' @param filter_reads_with_n_cpgs integer - pass to filter.length, filter reads from PAT file with less than n CpG sites. Default 3.
 #' @param quiet logical - should output be delivered silently? Default is FALSE.
 #' @param num_of_inits numeric - how many random prior initializations to set 
 #' for the EM approach. Default is 1 (uniform prior).
@@ -30,7 +31,8 @@
 #' deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
 #' }
 deconvolute_sample <- function(sample_pat, 
-                               reference, 
+                               reference,
+                               filter_reads_with_n_cpgs = 3,
                                quiet = F, 
                                retain_alphas = F,
                                output_format = "all",
@@ -70,7 +72,7 @@ deconvolute_sample <- function(sample_pat,
   # Read and validate PAT file
   if(!is.data.frame(sample_pat)){
     sample_pat <- try({
-        read_pat(path = sample_pat, filter.noninf = T, filter.length = 1, verbose = !quiet)
+        read_pat(path = sample_pat, filter.noninf = T, filter.length = filter_reads_with_n_cpgs, verbose = !quiet)
     }, silent = T)
     if(!is.data.frame(sample_pat)){
       stop("Unable to read sample pat file. Please provide valid data.frame or path to pat file.")

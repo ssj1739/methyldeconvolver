@@ -44,7 +44,10 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
   
   if(verbose){
     message("Finished filtering.")
-    message(paste0("Filtered out ", nrow(pat) - nrow(pat.filt), " reads out of ", nrow(pat), "."))
+    message(paste0("Filtered out ", sum(pat$nobs) - sum(pat.filt$nobs),
+                   " (",
+                   round(x = 100*(sum(pat$nobs) - sum(pat.filt$nobs))/sum(pat$nobs),digits = 2),
+                   "%) observed reads out of ", sum(pat$nobs), "."))
   }
   
   return(pat.filt)
