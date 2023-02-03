@@ -4,16 +4,14 @@
 \alias{overlap_marker_pat}
 \title{Overlap marker and APT files}
 \usage{
-overlap_marker_pat(pat, marker, minoverlap = 1, type = "any", ...)
+overlap_marker_pat(pat, marker, n_threads = 1)
 }
 \arguments{
 \item{pat}{Some description of PAT files}
 
 \item{marker}{Some description of Marker files}
 
-\item{minoverlap}{Minimum overlap of a read to a marker region}
-
-\item{type}{Type of overlap, see \code[GenomicRanges]{}}
+\item{n_threads}{Number of threads to use (default = 1)}
 }
 \description{
 Merging the PAT and Marker files together

@@ -7,6 +7,7 @@
 deconvolute_sample(
   sample_pat,
   reference,
+  filter_reads_with_n_cpgs = 3,
   quiet = F,
   retain_alphas = F,
   output_format = "all",
@@ -20,6 +21,8 @@ deconvolute_sample(
 \item{sample_pat}{Path to sample PAT file (output from wgbstools)}
 
 \item{reference}{Output from \code{\link{learn_reference}} function.}
+
+\item{filter_reads_with_n_cpgs}{integer - pass to filter.length, filter reads from PAT file with less than n CpG sites. Default 3.}
 
 \item{quiet}{logical - should output be delivered silently? Default is FALSE.}
 

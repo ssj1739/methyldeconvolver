@@ -19,7 +19,7 @@
 #' \dontrun{
 #' learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
 #' }
-learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F){
+learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T, n_threads = 1){
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
@@ -46,26 +46,29 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = F)
   beta_celltype_fits <- list()
   
   cell_type.num <- 1
+  
   for(pc in unique(pat.cell_types)){
     if(verbose) message(paste0("Reading PAT files from cell-type: ", pc, "; ", cell_type.num, " out of ", length(unique(pat.cell_types))))
     pc_pat.files <- pat.files[pat.cell_types == pc]
-    pc_pat.list <- list()
     pat.num <- 1
-    for(pf in pc_pat.files){
+    
+    pc_pat.list <- pbapply::pblapply(pc_pat.files, function(pf){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
-      pat <- read_pat(path = paste0(pat.dir,"/",pf), 
-                      verbose = verbose, 
-                      filter.noninf = T, 
+      pat <- read_pat(path = paste0(pat.dir,"/",pf),
+                      verbose = verbose,
+                      filter.noninf = T,
                       filter.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
       pat.num <- pat.num+1
-      pc_pat.list[[pf]] <- pat
-    }
-    
+      return(pat)
+    }, cl = n_threads)
+
     pc_pat.merged <- bind_rows(pc_pat.list)
-      
+
     if(verbose) message("Checking overlap of PAT files from ", pc)
-    overlap <- overlap_marker_pat(pat = pc_pat.merged, marker = marker)
-      
+    overlap <- overlap_marker_pat(pat = pc_pat.merged, 
+                                  marker = marker, 
+                                  n_threads = n_threads)
+
     if(verbose) message("Fitting beta distributions.")
     beta_celltype_fits[[pc]] <- fit_beta(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1

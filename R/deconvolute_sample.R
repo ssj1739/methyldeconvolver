@@ -79,7 +79,7 @@ deconvolute_sample <- function(sample_pat,
     }
   }
   # Align markers to reads on PAT file
-  omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker)
+  omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker, n_threads = n_threads)
   
   # Calculate coverage at each marker region
   omp$marker.gr$num_of_reads_per_marker <- sapply(1:length(omp$marker.gr), function(i){
@@ -92,7 +92,11 @@ deconvolute_sample <- function(sample_pat,
   #psi.mat <- matrix(nrow = length(omp$overlaps), ncol = length(reference$beta_celltype_fits), dimnames = list(c(), names(reference$beta_celltype_fits)))
  
   # Add progress bar for interactive runs
-  
+  # TODO: Some regions in the PAT file have multiple overlaps with marker regions, for one of two reasons:
+  # - Long reads in the PAT file can span multiple marker regions
+  # - The same exact genomic coordinates can be informative markers for multiple cell types
+  # A psi value should be computed using   
+
   res <- xapply(seq_along(omp$overlaps), function(i){
     # Calculate r
     r.vec = encode_binary(omp$pat.gr$read[omp$overlaps@from[i]])
