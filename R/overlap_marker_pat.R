@@ -14,11 +14,12 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
   require(pbapply)
   
   # Convert marker to GRanges object:
-  marker.ranges <- GenomicRanges::makeGRangesFromDataFrame(marker %>% 
-                                                             dplyr::select(-c("start", "end")), 
-                                                           start.field = "startCpG", 
-                                                           end.field = "endCpG", 
-                                                           keep.extra.columns = T)
+  marker.ranges <- marker
+  # marker.ranges <- GenomicRanges::makeGRangesFromDataFrame(marker %>% 
+  #                                                            dplyr::select(-c("start", "end")), 
+  #                                                          start.field = "startCpG", 
+  #                                                          end.field = "endCpG", 
+  #                                                          keep.extra.columns = T)
   
   # Convert pat to GRanges object:
   pat <- pat %>%
@@ -60,7 +61,7 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
         seqnames = pat.ranges@seqnames[pat_ind], 
         ranges = IRanges(start = actual_start, end = actual_end),
         read = substring(pat.granges_i$read, first = rel_start, last = rel_end),
-        nobs = pat.granges_i$nobs / length(marker.ranges_i)
+        nobs = pat.granges_i$nobs
       )
       new_ind = new_ind + 1
     }

@@ -4,8 +4,10 @@ library(methyldeconvolveR)
 pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/PAT/"
 marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
 
+marker <- read_marker(marker.file)
+
 reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T)
-reference <- readRDS("data/megan_rad/complete_reference_megan_rad_1-11-23.rds")
+#reference <- readRDS("data/megan_rad/complete_reference_megan_rad_1-11-23.rds")
 
 pat.files <- dir(pat.dir, full.names = T)
 

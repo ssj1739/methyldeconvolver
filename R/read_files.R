@@ -92,17 +92,50 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' \dontrun{
 #' read_marker(path = "inst_data/human_mixintest_top25.txt")
 #' }
-read_marker <- function(path="data/Human_mixintest_top25.txt", linelimit = Inf){
+read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F){
   require(data.table)
-  marker = data.table::fread(path, nrows = linelimit, header = F)
+  require(GenomicRanges)
+  require(tidyverse)
+  
+  marker = data.table::fread(path, nrows = Inf, header = F)
   if(!grepl("[1-9]",marker[1,1])){
     marker <- marker[2:nrow(marker),]
   }
-  colnames(marker)[1:8] <- c("chr", "start", "end", "startCpG", "endCpG", "target", "name", "direction")
+  colnames(marker)[1:8] <- c("chr", "startChr", "endChr", "startCpG", "endCpG", "target", "name", "direction")
 
   # Normalize case of target cell types
   marker$target <- tolower(marker$target)
   
-  return(marker)
+  # Merge overlapping marker regions
+  marker.gr <- GenomicRanges::makeGRangesFromDataFrame(marker, 
+                                                    start.field = "startCpG", 
+                                                    end.field = "endCpG",
+                                                    keep.extra.columns = T)
+  
+  if(no_reduction){
+    return(marker.gr)
+  }
+    
+  
+  marker.gr.red <- GenomicRanges::reduce(marker.gr)
+
+  reannotate.ol <- GenomicRanges::findOverlaps(marker.gr.red, marker.gr)
+  reannotate.target <- character(length(marker.gr.red))
+  reannotate.oi <- character(length(marker.gr.red))
+  reannotate.n_merged <- numeric(length(marker.gr.red))
+  for(i in 1:length(marker.gr.red)){
+    original.ind <- reannotate.ol@to[reannotate.ol@from==i]
+    reannotate.target[i] <- paste0(unique(marker.gr$target[original.ind]), collapse = ",")
+    reannotate.oi[i] <- paste0(original.ind, collapse = ',')
+    reannotate.n_merged[i] <- length(original.ind)
+  }
+  
+  marker.gr.red$target <- reannotate.target
+  marker.gr.red$original.ind <- reannotate.oi
+  marker.gr.red$n_merged <- reannotate.n_merged
+  
+  
+  out_marker <- marker.gr.red
+  return(out_marker)
 }
 
