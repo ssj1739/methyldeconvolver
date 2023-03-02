@@ -26,7 +26,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   marker = read_marker(marker.file)
   
   # Identify # of Pat files in pat.dir, ensure correct formats
-  pat.files = dir(pattern = "*.pat*", pat.dir, full.names = F)
+  pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
   pat.cell_types <- tolower(sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1]))
   
   # Verify that all PAT file cell types are contained in the marker file "targets" column
@@ -62,7 +62,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
       return(pat)
     }, cl = n_threads)
 
-    pc_pat.merged <- bind_rows(pc_pat.list)
+    pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
 
     if(verbose) message("Checking overlap of PAT files from ", pc)
     overlap <- overlap_marker_pat(pat = pc_pat.merged, 
