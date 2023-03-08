@@ -23,3 +23,43 @@ encode_binary <- function(read){
   
   return(as.numeric(read.sp))
 }
+
+filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.granges = F){
+  
+  if("GRanges" %in% class(pat)){
+    output.as.granges = T
+    pat <- as.data.frame(pat) %>%
+      select(-strand)
+  }
+  
+  # Filtering pat files by number of CpGs
+  pat.filt <- pat %>%
+    dplyr::filter(nchar(read) >= filter.length)
+  
+  # Filtering PAT files by read information (should contain CpG with known methylation status)
+  if(isTRUE(filter.noninf)){
+    pat.filt <- pat.filt %>%
+      dplyr::filter(grepl("C|T", read))
+  }
+  
+  if(verbose){
+    message("Finished filtering.")
+    message(paste0("Filtered out ", sum(pat$nobs) - sum(pat.filt$nobs),
+                   " (",
+                   round(x = 100*(sum(pat$nobs) - sum(pat.filt$nobs))/sum(pat$nobs),digits = 2),
+                   "%) observed reads out of ", sum(pat$nobs), "."))
+  }
+  
+  if(output.as.granges){
+    pat.filt <- pat.filt %>%
+      mutate(end = start + stringr::str_length(pat.filt$read)) # Add column for end to load into GR
+    pat.ranges <- GenomicRanges::makeGRangesFromDataFrame(pat.filt, 
+                                                          keep.extra.columns = T, 
+                                                          ignore.strand = T, 
+                                                          end.field = 'end', 
+                                                          start.field = 'start')
+    return(pat.ranges)
+  }
+  
+  return(pat.filt)
+}

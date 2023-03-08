@@ -67,14 +67,16 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
     }
     return(pat.ranges.to_add)
   }, cl = n_threads)
-  # Generate new pat file and re-align
+  # Generate new pat, filter, and re-align
   pat.ranges.split_reads <- do.call(`c`, res)
   
+  pat.filt <- filter_pat(pat = pat.ranges.split_reads)
+  
   # Second overlap
-  marker.pat.overlaps.2 <- findOverlaps(query = pat.ranges.split_reads, 
+  marker.pat.overlaps.2 <- findOverlaps(query = pat.filt, 
                                       subject = marker.ranges, 
                                       minoverlap = 1, type = "any")
   
   
-  return(list(overlaps = marker.pat.overlaps.2, pat.gr = pat.ranges.split_reads, marker.gr = marker.ranges))
+  return(list(overlaps = marker.pat.overlaps.2, pat.gr = pat.filt, marker.gr = marker.ranges))
 }

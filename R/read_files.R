@@ -18,9 +18,8 @@
 #' }
 read_pat <- function(path="data/ref/Hep_all.pat.gz", 
                      linelimit = Inf,
-                     filter.noninf = T,
-                     filter.length = 3,
-                     verbose = F){
+                     verbose = F,
+                     ...){
   require(data.table)
   require(dplyr)
   if(verbose) message("Starting to read file.")
@@ -32,23 +31,7 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
   if(verbose)
     message("Finished reading, now filtering.")
   
-  # Filtering pat files by number of CpGs
-  pat.filt <- pat %>%
-    dplyr::filter(nchar(read) >= filter.length)
-  
-  # Filtering PAT files by read information (should contain CpG with known methylation status)
-  if(isTRUE(filter.noninf)){
-    pat.filt <- pat.filt %>%
-      dplyr::filter(grepl("C|T", read))
-  }
-  
-  if(verbose){
-    message("Finished filtering.")
-    message(paste0("Filtered out ", sum(pat$nobs) - sum(pat.filt$nobs),
-                   " (",
-                   round(x = 100*(sum(pat$nobs) - sum(pat.filt$nobs))/sum(pat$nobs),digits = 2),
-                   "%) observed reads out of ", sum(pat$nobs), "."))
-  }
+  pat.filt <- filter_pat(pat, ...)
   
   return(pat.filt)
 }
