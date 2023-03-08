@@ -52,15 +52,16 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
     pc_pat.files <- pat.files[pat.cell_types == pc]
     pat.num <- 1
     
-    pc_pat.list <- pbapply::pblapply(pc_pat.files, function(pf){
+    pc_pat.list <- list()
+    for(pf in pc_pat.files){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
       pat <- read_pat(path = paste0(pat.dir,"/",pf),
                       verbose = verbose,
                       filter.noninf = T,
                       filter.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
       pat.num <- pat.num+1
-      return(pat)
-    }, cl = n_threads)
+      pc_pat.list[[pf]] <- pat
+    }
 
     pc_pat.merged <- bind_rows(pc_pat.list)
 
