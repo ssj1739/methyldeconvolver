@@ -2,7 +2,7 @@
 library(methyldeconvolveR)
 library(tidyverse)
 
-#ref <- learn_reference(marker.file = "data/FullTest/Sid_testmarkers.bed", pat.dir = "data/FullTest/ref/", save.output = "data/FullTest/FullTest_ref.rds")
+ref <- learn_reference(marker.file = "data/FullTest/Sid_testmarkers.bed", pat.dir = "data/FullTest/ref/", save.output = "data/FullTest/FullTest_ref.rds")
 ref <- readRDS("data/FullTest/FullTest_ref.rds")
 sample.pat <- read_pat(path = "data/FullTest/test_mix_1.pat.gz", verbose = T)
 

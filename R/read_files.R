@@ -25,6 +25,7 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
   if(verbose) message("Starting to read file.")
   pat = data.table::fread(file = path, nrows = linelimit, header = F)
   colnames(pat)[1:4] <- c("chr", "start", "read", "nobs")
+  
   # Filter for read requirements:
   # - Must have at least 1 C or T
   # - Must be of length 3 or more
@@ -95,7 +96,7 @@ read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F)
                                                     end.field = "endCpG",
                                                     keep.extra.columns = T)
   
-  if(no_reduction){
+  if(isTRUE(no_reduction)){
     return(marker.gr)
   }
     

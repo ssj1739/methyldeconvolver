@@ -43,12 +43,14 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   
   # Loop through each pat file in directory
   if(verbose) message("Starting to loop through pat files:")
+  if(length(pat.files) == 0)
+    stop("ERROR: No PAT files found in specified pat.dir.")
   beta_celltype_fits <- list()
   
   cell_type.num <- 1
   
   for(pc in unique(pat.cell_types)){
-    if(verbose) message(paste0("Reading PAT files from cell-type: ", pc, "; ", cell_type.num, " out of ", length(unique(pat.cell_types))))
+    if(verbose) message(paste0("Reading PAT files from cell-type ",cell_type.num," out of ", length(unique(pat.cell_types)), ": ", pc))
     pc_pat.files <- pat.files[pat.cell_types == pc]
     pat.num <- 1
     
@@ -78,15 +80,16 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   }
   
   # Return reference format, with markers and shape params/beta.f for each celltype
-  marker.subset <- marker %>%
-    select(chr, startCpG, endCpG, target)
+   marker.subset <- marker
+  #   as.data.frame() %>%
+  #   select(chr, startCpG, endCpG, target)
   
   bad.markers <- c()
   for(cell_type in names(beta_celltype_fits)){
     beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
     bad.markers <- c(bad.markers, beta_celltype_fits_subset$marker.index[beta_celltype_fits_subset$psi.init==0])
   }
-  bad.markers <- unique(bad.markers)
+  bad.markers <- sort(unique(bad.markers))
   
   output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
   

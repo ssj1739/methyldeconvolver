@@ -1,12 +1,16 @@
 # Learn Full Reference
 library(methyldeconvolveR)
 
-pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/"
-marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
+pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/PAT/"
+#pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/"
+marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
+#marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
 
 marker <- read_marker(marker.file)
+pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
 
-reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 12)
+
+reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 6)
 #reference <- readRDS("data/megan_rad/complete_reference_megan_rad_1-11-23.rds")
 
 pat.files <- dir(pat.dir, full.names = T)
