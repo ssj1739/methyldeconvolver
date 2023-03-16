@@ -49,7 +49,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   
   cell_type.num <- 1
   
-  for(pc in unique(pat.cell_types)){
+  for(pc in unique(pat.cell_types)[1:3]){
     if(verbose) message(paste0("Reading PAT files from cell-type ",cell_type.num," out of ", length(unique(pat.cell_types)), ": ", pc))
     pc_pat.files <- pat.files[pat.cell_types == pc]
     pat.num <- 1
@@ -73,7 +73,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
                                   n_threads = n_threads)
 
     if(verbose) message("Fitting beta distributions.")
-    beta_celltype_fits[[pc]] <- fit_beta(overlaps.list = overlap)
+    beta_celltype_fits[[pc]] <- fit_beta_new(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1
     rm(pc_pat.merged, overlap)
     gc(full = T)

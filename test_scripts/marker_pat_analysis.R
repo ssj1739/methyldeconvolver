@@ -6,7 +6,7 @@ library(tidyverse)
 
 
 marker <- read_marker("data/Human_mixintest_top25.txt")
-pat <- read_pat("data/Test25_1.pat.gz")
+pat <- read_pat("data/Test25_1.pat.gz", verbose = T)
 #colnames(pat) <- c("chr", "start", "read", "nobs")
 #pat$end <- pat$start + nchar(pat$read)
 

@@ -24,12 +24,12 @@ encode_binary <- function(read){
   return(as.numeric(read.sp))
 }
 
-filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.granges = F){
+filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.granges = F, verbose = F){
   
   if("GRanges" %in% class(pat)){
     output.as.granges = T
     pat <- as.data.frame(pat) %>%
-      select(-strand)
+      dplyr::select(-strand)
   }
   
   # Filtering pat files by number of CpGs
@@ -52,7 +52,7 @@ filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.gran
   
   if(output.as.granges){
     pat.filt <- pat.filt %>%
-      mutate(end = start + stringr::str_length(pat.filt$read)) # Add column for end to load into GR
+      dplyr::mutate(end = start + stringr::str_length(pat.filt$read)) # Add column for end to load into GR
     pat.ranges <- GenomicRanges::makeGRangesFromDataFrame(pat.filt, 
                                                           keep.extra.columns = T, 
                                                           ignore.strand = T, 
