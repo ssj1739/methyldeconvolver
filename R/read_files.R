@@ -32,7 +32,7 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
   if(verbose)
     message("Finished reading, now filtering.")
   
-  pat.filt <- filter_pat(pat, ...)
+  pat.filt <- filter_pat(pat, verbose = verbose, ...)
   
   return(pat.filt)
 }
