@@ -219,21 +219,19 @@ fit_beta_new <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         return(-beta_ll)
       }
       
+      # Actual mean and variance
       mu <- mean(rep.meth.fraction)
       sigma <- var(rep.meth.fraction)
       
+      # Fit beta dist. using beta likelihood function and optimization with constraints
       res = stats::optim(par = c(0.01, 0.01), fn = beta_likelihood, x = rep.meth.fraction, method = "L-BFGS-B", lower = 0.01, upper = 100)
       fit.mle <- res$par
       
+      # Empirically calculate beta dist. using mean and variance of meth. fractions
       fit.emp = estBetaParams(mu, sigma)
       
-      
-      
+      # Derive beta function value from fitted beta parameters
       beta.f <- beta(fit.mle[1], fit.mle[2])
-      
-      
-      
-      
     }
     return(data.frame(shape1 = fit.mle[1], shape2 = fit.mle[2], beta.f = beta.f, 
                       shape1.emp = fit.emp[1], shape2.emp = fit.emp[2],

@@ -1,5 +1,5 @@
 
-#' Overlap marker and APT files
+#' Overlap marker and PAT files
 #' 
 #'@description Merging the PAT and Marker files together
 #'@param pat Some description of PAT files
