@@ -46,7 +46,7 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
     
   res <- pbapply::pbsapply(pat_ind_all, function(pat_ind){
     pat.granges_i <- pat.ranges[pat_ind]
-    pat.ranges_i <- pat.ranges[pat_ind]@ranges
+    pat.ranges_i <- pat.granges_i@ranges
     marker_ind <- marker.pat.overlaps@to[marker.pat.overlaps@from == pat_ind]
     marker.ranges_i <- marker.ranges[marker_ind]@ranges
     pat.ranges.to_add <- GenomicRanges::GRanges()
