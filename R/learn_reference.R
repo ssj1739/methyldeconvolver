@@ -59,7 +59,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
     for(pf in pc_pat.files){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
       pat <- read_pat(path = paste0(pat.dir,"/",pf),
-                      verbose = verbose,
+                      verbose = T,
                       filter.noninf = T,
                       filter.length = 3,
                       filter.inf.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
