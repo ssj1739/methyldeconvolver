@@ -157,6 +157,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
 #'
 #' @return beta params for each marker region using stats::optim
 #'
+#' @export
 #' @examples
 #' \dontrun{
 #' fit_beta_new(overlaps.list)

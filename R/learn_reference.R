@@ -19,7 +19,7 @@
 #' \dontrun{
 #' learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
 #' }
-learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T, n_threads = 1){
+learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T, n_threads = 1, filter.cpg = 3){
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
@@ -49,23 +49,32 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   
   cell_type.num <- 1
   
-  for(pc in unique(pat.cell_types)[1:3]){
+  for(pc in unique(pat.cell_types)){
     if(verbose) message(paste0("Reading PAT files from cell-type ",cell_type.num," out of ", length(unique(pat.cell_types)), ": ", pc))
     pc_pat.files <- pat.files[pat.cell_types == pc]
     pat.num <- 1
     
-    pc_pat.list <- list()
+    #pc_pat.list <- list()
+    overlap_list <- list()
     for(pf in pc_pat.files){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
       pat <- read_pat(path = paste0(pat.dir,"/",pf),
                       verbose = verbose,
                       filter.noninf = T,
-                      filter.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
+                      filter.length = 3,
+                      filter.inf.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
       pat.num <- pat.num+1
-      pc_pat.list[[pf]] <- pat
+      #pc_pat.list[[pf]] <- pat
+      
+      overlap_list[[pf]] <- overlap_marker_pat(pat = pat[1:1000,],
+                                                 marker = marker,
+                                                 n_threads = n_threads)      
+        
+  
     }
 
-    pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
+    #pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
+    #rm(pc_pat.list)
 
     if(verbose) message("Checking overlap of PAT files from ", pc)
     overlap <- overlap_marker_pat(pat = pc_pat.merged, 

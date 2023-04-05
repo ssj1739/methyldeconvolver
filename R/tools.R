@@ -24,7 +24,22 @@ encode_binary <- function(read){
   return(as.numeric(read.sp))
 }
 
-filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.granges = F, verbose = F){
+#' filter_pat
+#'
+#' @param pat 
+#' @param filter.noninf 
+#' @param filter.length 
+#' @param filter.inf.length 
+#' @param output.as.granges 
+#' @param verbose 
+#'
+#' @return
+#' @export
+#'
+filter_pat <- function(pat, filter.noninf = T, 
+                       filter.length = 3, 
+                       filter.inf.length = 3,
+                       output.as.granges = F, verbose = F){
   
   if("GRanges" %in% class(pat)){
     output.as.granges = T
@@ -41,6 +56,10 @@ filter_pat <- function(pat, filter.noninf = T, filter.length = 3, output.as.gran
     pat.filt <- pat.filt %>%
       dplyr::filter(grepl("C|T", read))
   }
+  
+  # Filtering PAT files by number of informative CpGs
+  pat.filt <- pat.filt %>%
+    dplyr::filter(str_count(string = read, pattern = "C|T") > filter.inf.length)
   
   if(verbose){
     message("Finished filtering.")
