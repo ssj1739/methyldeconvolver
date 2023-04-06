@@ -1,5 +1,7 @@
 #' fit_beta_old
 #'
+#'uses fitdistrplus mle and mme methods
+#'
 #' @param overlaps.list 
 #'
 #' @return DEPRECATED - list of beta params using fitdistr
@@ -30,12 +32,13 @@ fit_beta_old <- function(overlaps.list, pf = 0.05){
     pat.subset <- pat.ranges[pat.index]
     nTs = stringr::str_count(pat.subset$read, "T")
     nCs = stringr::str_count(pat.subset$read, "C")
-    meth.fraction <-  nCs / (nCs + nTs)
-    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs)
+    meth.fraction <-  nCs / (nCs + nTs) #calc read level methylation fraction
+    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs) #repeat methylation fraction by number of times PAT read was observed
     
     # If there are not at least 3 distinct reads that map to a given site,
     # and not at least 2 unique values (not all 0s or all 1s), then consider modeling the marker:
     
+    #Add/subtract pseudo count
     avg.meth <- mean(rep.meth.fraction, na.rm = T)
     if(avg.meth==0){
       avg.meth = avg.meth + pf
@@ -43,8 +46,8 @@ fit_beta_old <- function(overlaps.list, pf = 0.05){
     if(avg.meth==1){
       avg.meth = avg.meth - pf
     }
-    fit <- rep(NA, 2)
-    beta.f <- NA
+    fit <- rep(NA, 2) #beta parameters
+    beta.f <- NA #beta function calculation for later computation
     if(length(rep.meth.fraction) >= 3 & length(unique(rep.meth.fraction)) >= 2){
       # First try mle:
       fit = try({
@@ -67,7 +70,7 @@ fit_beta_old <- function(overlaps.list, pf = 0.05){
 }
 
 #' fit_beta
-#' Fits a beta distribution to given methylation signals from sample pat file
+#' Fits a beta distribution to given methylation signals from sample pat file using optim function to maximize beta distr log-likelihood
 #'
 #' @param overlaps.list output from overlap_marker_pat
 #' @param pseudo add pseudocount to avoid Inf/-Inf log values (default = 1e-7)
@@ -102,28 +105,30 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         sigma = NA
       ))
     }
-    # Potentially add filter step to remove <=2 length of pat.index
     
     pat.subset <- pat.ranges[pat.index]
     nTs = stringr::str_count(pat.subset$read, "T")
     nCs = stringr::str_count(pat.subset$read, "C")
-    meth.fraction <-  nCs / (nCs + nTs)
-    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs)
+    meth.fraction <-  nCs / (nCs + nTs) #calc read level methylation fraction
+    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs) #repeat methylation fraction by number of times PAT read was observed
     
-    # Prevent taking the log of 0:
+    # Prevent taking the log of 0 by adding/subtracting pseudo count
     rep.meth.fraction[rep.meth.fraction==0] <- rep.meth.fraction[rep.meth.fraction==0]+pseudo
     rep.meth.fraction[rep.meth.fraction==1] <- rep.meth.fraction[rep.meth.fraction==1]-pseudo
     
-    fit <- rep(NA, 2)
-    beta.f <- NA
-    mu = NA
-    sigma = NA
+    fit <- rep(NA, 2) #beta distr parameters
+    beta.f <- NA #beta function for later computation
+    mu = NA #mean of beta distribution
+    sigma = NA #variance of beta distribution
     
-    # If there are not at least 3 distinct reads that map to a given site,
+    # If there are not at least 3 distinct PAT reads that map to a given site,
     # and not at least 2 unique values (not all 0s or all 1s), then consider modeling the marker:
-    ### NOTE: Come back to the filtering step here.
+    #
+    ### NOTE: Come back to the filtering step here or consider specifying as user input parameters
+    #
+    #Calculate beta distribution log-likelihood using vector of read levelmethylation fractions at each marker region
     if(length(rep.meth.fraction) >= 3){
-      beta_likelihood <- function(theta, x){
+      beta_likelihood <- function(theta, x){ #define beta log-likelihood
         N <- length(x)
         alpha <- theta[1]
         beta <- theta[2]
@@ -131,7 +136,8 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         return(-beta_ll)
       }
       
-      res = stats::optim(par = c(0.01, 0.01), fn = beta_likelihood, x = rep.meth.fraction, method = "L-BFGS-B", lower = 0.01, upper = 100)
+      #Use optim function to find mle
+      res = stats::optim(par = c(0.01, 0.01), fn = beta_likelihood, x = rep.meth.fraction, method = "L-BFGS-B", lower = 0.001, upper = 10000)
       
       fit <- res$par
       beta.f <- beta(fit[1], fit[2])
@@ -141,6 +147,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       
       
     }
+    #output alpha, beta, beta function, marker index, mean, variance
     return(data.frame(shape1 = fit[1], shape2 = fit[2], beta.f = beta.f, marker.index = x, mu = mu, sigma = sigma))
   }) %>%
     dplyr::bind_rows() %>%
@@ -151,6 +158,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
 
 #' fit_beta_new
 #' Fits a beta distribution to given methylation signals from sample pat file
+#' Uses optim method to find mle and mme using empirical mean and variance
 #'
 #' @param overlaps.list output from overlap_marker_pat
 #' @param pseudo add pseudocount to avoid Inf/-Inf log values (default = 1e-7)
@@ -173,6 +181,7 @@ fit_beta_new <- function(overlaps.list, pseudo = 1e-7, verbose = F){
   if(verbose)
     message("Learning beta distribution parameters.")
   
+  #loop through each cell/marker pair
   beta_fits <- lapply(1:length(overlaps.list$marker.gr), function(x){
     pat.index <- marker.pat.overlaps@from[marker.pat.overlaps@to == x]
     if(length(pat.index)==0){
@@ -185,15 +194,14 @@ fit_beta_new <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         sigma = NA
       ))
     }
-    # Potentially add filter step to remove <=2 length of pat.index
     
     pat.subset <- pat.ranges[pat.index]
     nTs = stringr::str_count(pat.subset$read, "T")
     nCs = stringr::str_count(pat.subset$read, "C")
-    meth.fraction <-  nCs / (nCs + nTs)
-    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs)
+    meth.fraction <-  nCs / (nCs + nTs) #caluclate read level methylation fractions
+    rep.meth.fraction <- rep(meth.fraction, pat.subset$nobs) #repeat methylation fraction number of times unique PAT read was observed
     
-    # Prevent taking the log of 0:
+    # Prevent taking the log of 0 by adding/subtracting a psuedo count
     rep.meth.fraction[rep.meth.fraction==0] <- rep.meth.fraction[rep.meth.fraction==0]+pseudo
     rep.meth.fraction[rep.meth.fraction==1] <- rep.meth.fraction[rep.meth.fraction==1]-pseudo
     
@@ -205,13 +213,16 @@ fit_beta_new <- function(overlaps.list, pseudo = 1e-7, verbose = F){
     # If there are not at least 3 distinct reads that map to a given site,
     # and not at least 2 unique values (not all 0s or all 1s), then consider modeling the marker:
     ### NOTE: Come back to the filtering step here.
+    
     if(length(rep.meth.fraction) >= 3){
+      #method of moments beta distr
       estBetaParams <- function(mu, var) {
         alpha <- (((1 - mu) / var) - (1 / mu)) * mu ^ 2
         beta <- alpha * (1 / mu - 1)
         return(params = c(alpha, beta))
       }
       
+      #beta likeihood function to maximize
       beta_likelihood <- function(theta, x){
         N <- length(x)
         alpha <- theta[1]
@@ -220,20 +231,22 @@ fit_beta_new <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         return(-beta_ll)
       }
       
-      # Actual mean and variance
+      # Empirical mean and variance of for mme fit
       mu <- mean(rep.meth.fraction)
       sigma <- var(rep.meth.fraction)
       
-      # Fit beta dist. using beta likelihood function and optimization with constraints
-      res = stats::optim(par = c(0.01, 0.01), fn = beta_likelihood, x = rep.meth.fraction, method = "L-BFGS-B", lower = 0.01, upper = 100)
+      # Fit beta distr by mle using beta likelihood function and optim function with L-BFGS-B method
+      res = stats::optim(par = c(0.01, 0.01), fn = beta_likelihood, x = rep.meth.fraction, method = "L-BFGS-B", lower = 0.0001, upper = 10000)
       fit.mle <- res$par
       
-      # Empirically calculate beta dist. using mean and variance of meth. fractions
+      # Empirically calculate beta distr using empirical mean and variance of read level methylation fractions
       fit.emp = estBetaParams(mu, sigma)
       
-      # Derive beta function value from fitted beta parameters
+      # Derive beta function value from fitted beta parameters, used in later computations
+      #Currently only returning mle version
       beta.f <- beta(fit.mle[1], fit.mle[2])
     }
+    #return both mle and mme estimates with meta data
     return(data.frame(shape1 = fit.mle[1], shape2 = fit.mle[2], beta.f = beta.f, 
                       shape1.emp = fit.emp[1], shape2.emp = fit.emp[2],
                       marker.index = x, mu = mu, sigma = sigma))
