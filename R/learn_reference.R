@@ -61,11 +61,12 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
       pat <- read_pat(path = paste0(pat.dir,"/",pf),
                       verbose = T,
                       filter.noninf = T,
-                      filter.length = 3,
-                      filter.inf.length = 3) # Filter out reads in reference PAT containing less than 3 CpGs
+                      filter.length = 3, #Filter out reads in reference PAT containing less than 3 CpGs
+                      filter.inf.length = 3) # Require CpGs to have observed C or T
       pat.num <- pat.num+1
       #pc_pat.list[[pf]] <- pat
       
+      #Find overlaps between reference pat files and markers file 
       overlap_list[[pf]] <- overlap_marker_pat(pat = pat[1:1000,],
                                                  marker = marker,
                                                  n_threads = n_threads)      
@@ -81,6 +82,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
                                   marker = marker, 
                                   n_threads = n_threads)
 
+    #Learn beta distribution for each maker region
     if(verbose) message("Fitting beta distributions.")
     beta_celltype_fits[[pc]] <- fit_beta_new(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1
@@ -93,6 +95,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   #   as.data.frame() %>%
   #   select(chr, startCpG, endCpG, target)
   
+  #Identify cell/marker pairs with insufficient reference data or unable to fit beta                                
   bad.markers <- c()
   for(cell_type in names(beta_celltype_fits)){
     beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
