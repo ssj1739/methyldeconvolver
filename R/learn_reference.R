@@ -71,14 +71,9 @@ learn_reference <- function(marker.file,
                       filter.noninf = filter.noninf,
                       filter.length = filter.length,
                       filter.inf.length = filter.inf.length) # Filter out reads in reference PAT containing less than 3 CpGs
+
       pat.num <- pat.num+1
       pc_pat.list[[pf]] <- pat
-      
-      # overlap_list[[pf]] <- overlap_marker_pat(pat = pat,
-      #                                            marker = marker,
-      #                                            n_threads = n_threads, split_reads = F)
-        
-  
     }
     
     pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
@@ -90,6 +85,7 @@ learn_reference <- function(marker.file,
                                   n_threads = n_threads,
                                   split_reads = split_reads)
 
+    #Learn beta distribution for each maker region
     if(verbose) message("Fitting beta distributions.")
     beta_celltype_fits[[pc]] <- fit_beta_new(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1
@@ -102,6 +98,7 @@ learn_reference <- function(marker.file,
   #   as.data.frame() %>%
   #   select(chr, startCpG, endCpG, target)
   
+  #Identify cell/marker pairs with insufficient reference data or unable to fit beta                                
   bad.markers <- c()
   for(cell_type in names(beta_celltype_fits)){
     beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
