@@ -1,14 +1,14 @@
 # Learn Full Reference
 library(methyldeconvolveR)
 
-#pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/PAT/"
-pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/"
-#marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
-marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
+pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/PAT/"
+#pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/"
+marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
+#marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
 
 marker <- read_marker(marker.file)
-pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
-
+pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = T)
+pat <- read_pat(path = pat.files[1], verbose = T)
 
 reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 12)
 saveRDS(reference, file = "~/Tools/methyldeconvolver/data/reference_3-27-23.rds")
