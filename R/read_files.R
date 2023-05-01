@@ -76,12 +76,13 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' \dontrun{
 #' read_marker(path = "inst_data/human_mixintest_top25.txt")
 #' }
-read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F){
+read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F, sep = '\t'){
   require(data.table)
   require(GenomicRanges)
   require(tidyverse)
   
-  marker = data.table::fread(path, nrows = Inf, header = F)
+  #marker = data.table::fread(path, nrows = Inf, header = F)
+  marker = read.table(file = path, header = F, sep = sep)
   if(!grepl("[1-9]",marker[1,1])){
     marker <- marker[2:nrow(marker),]
   }

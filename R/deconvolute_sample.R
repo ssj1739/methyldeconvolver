@@ -36,7 +36,9 @@ deconvolute_sample <- function(sample_pat,
                                quiet = F, 
                                retain_alphas = F,
                                output_format = "all",
-                               num_of_inits = 10, max_iter = 100,
+                               num_of_inits = 10, 
+                               max_iter = 100,
+                               use.empirical = T,
                                calculate_confidence_int = NA,
                                n_threads = 1){
   if(require(pbapply)){
@@ -103,14 +105,17 @@ deconvolute_sample <- function(sample_pat,
     
     # Extract shape1, shape2, and beta.f for each marker that's associated with the ith read
     # Length of each of these vectors is the # of cell types
+    if(use.empirical){
+      shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1.emp[omp$overlaps@to[i]]))
+      shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2.emp[omp$overlaps@to[i]]))
+      beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f.emp[omp$overlaps@to[i]]))
+    }else{
+      shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[omp$overlaps@to[i]]))
+      shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[omp$overlaps@to[i]]))
+      beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[omp$overlaps@to[i]]))
+    }
     
-    # shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[x$marker.index==omp$overlaps@to[i]]))
-    # shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[x$marker.index==omp$overlaps@to[i]]))
-    # beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[x$marker.index==omp$overlaps@to[i]]))
-    # psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[x$marker.index==omp$overlaps@to[i]])))
-    shape1 = sapply(reference$beta_celltype_fits, function(x) return(x$shape1[omp$overlaps@to[i]]))
-    shape2 = sapply(reference$beta_celltype_fits, function(x) return(x$shape2[omp$overlaps@to[i]]))
-    beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[omp$overlaps@to[i]]))
+    
     psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[omp$overlaps@to[i]])))
     meth.frac = sum(r.vec) / length(r.vec)
     

@@ -19,7 +19,15 @@
 #' \dontrun{
 #' learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
 #' }
-learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T, n_threads = 1, filter.cpg = 3){
+learn_reference <- function(marker.file, 
+                            pat.dir, 
+                            save.output = "", 
+                            verbose = T, 
+                            n_threads = 1,
+                            split_reads = F,
+                            filter.inf.length = 3,
+                            filter.length = 3,
+                            filter.noninf = T){
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
@@ -54,39 +62,34 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
     pc_pat.files <- pat.files[pat.cell_types == pc]
     pat.num <- 1
     
-    #pc_pat.list <- list()
-    overlap_list <- list()
+    pc_pat.list <- list()
+    #overlap_list <- list()
     for(pf in pc_pat.files){
       if(verbose) message(paste0("Reading ", pat.num, " of ", length(pc_pat.files), " PAT files"))
       pat <- read_pat(path = paste0(pat.dir,"/",pf),
-                      verbose = T,
-                      filter.noninf = T,
-                      filter.length = 3, #Filter out reads in reference PAT containing less than 3 CpGs
-                      filter.inf.length = 3) # Require CpGs to have observed C or T
-      pat.num <- pat.num+1
-      #pc_pat.list[[pf]] <- pat
-      
-      #Find overlaps between reference pat files and markers file 
-      overlap_list[[pf]] <- overlap_marker_pat(pat = pat[1:1000,],
-                                                 marker = marker,
-                                                 n_threads = n_threads)      
-        
-  
-    }
+                      verbose = verbose,
+                      filter.noninf = filter.noninf,
+                      filter.length = filter.length,
+                      filter.inf.length = filter.inf.length) # Filter out reads in reference PAT containing less than 3 CpGs
 
-    #pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
+      pat.num <- pat.num+1
+      pc_pat.list[[pf]] <- pat
+    }
+    
+    pc_pat.merged <- dplyr::bind_rows(pc_pat.list)
     #rm(pc_pat.list)
 
     if(verbose) message("Checking overlap of PAT files from ", pc)
-    overlap <- overlap_marker_pat(pat = pc_pat.merged, 
-                                  marker = marker, 
-                                  n_threads = n_threads)
+    overlap <- overlap_marker_pat(pat = pc_pat.merged,
+                                  marker = marker,
+                                  n_threads = n_threads,
+                                  split_reads = split_reads)
 
     #Learn beta distribution for each maker region
     if(verbose) message("Fitting beta distributions.")
-    beta_celltype_fits[[pc]] <- fit_beta_new(overlaps.list = overlap)
+    beta_celltype_fits[[pc]] <- fit_beta(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1
-    rm(pc_pat.merged, overlap)
+    rm(pc_pat.list, pc_pat.merged, overlap)
     gc(full = T)
   }
   
@@ -103,7 +106,7 @@ learn_reference <- function(marker.file, pat.dir, save.output = "", verbose = T,
   }
   bad.markers <- sort(unique(bad.markers))
   
-  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
+  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits, overlap = overlap)
   
   if(save.output!=""){
     if(is.logical(save.output) & isTRUE(save.output))

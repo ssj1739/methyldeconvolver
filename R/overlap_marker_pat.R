@@ -8,7 +8,7 @@
 #'
 #'@export
 #'
-overlap_marker_pat <- function(pat, marker, n_threads = 1){
+overlap_marker_pat <- function(pat, marker, split_reads = F, n_threads = 1){
   require(GenomicRanges)
   require(dplyr)
   require(pbapply)
@@ -29,12 +29,13 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
                                                         ignore.strand = T, 
                                                         end.field = 'end', 
                                                         start.field = 'start')
-
   
+  pat.filt <- filter_pat(pat.ranges)
+
   # Find overlaps, taking into account overlap
   # Find all the overlaps, including anything with overhangs.
   # minoverlap by default is set to 3.
-  marker.pat.overlaps.any <- findOverlaps(query = pat.ranges, 
+  marker.pat.overlaps.any <- findOverlaps(query = pat.filt, 
                                       subject = marker.ranges, 
                                       minoverlap = 3, type = "any")
   
@@ -43,9 +44,14 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
   }
   
   # Find overlaps of "ideal scenarios", where the entire pat read is within the marker region
-  marker.pat.overlaps.within <- findOverlaps(query = pat.ranges, 
+  marker.pat.overlaps.within <- findOverlaps(query = pat.filt, 
                                              subject = marker.ranges, 
                                              minoverlap = 3, type = "within")
+  
+  if(isFALSE(split_reads)){
+    warning("split_read = FALSE; Returning only overlaps of PAT reads within marker regions.")
+    return(list(overlaps = marker.pat.overlaps.within, pat.gr = pat.filt, marker.gr = marker.ranges))
+  }
   
   # Remove the ideal scenarios, leaving only those with overhangs
   # Trim and split the overhanging reads in the next loop
@@ -63,8 +69,8 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
     marker_ind <- marker.pat.overlaps.any@to[marker.pat.overlaps.any@from == pat_ind]
     # Get the marker granges object that corresponds with marker_ind
     marker.granges_i <- marker.ranges[marker_ind]
-    #pat.ranges.to_add <- GenomicRanges::GRanges()
-    pat.ranges.to_add <- list()
+    pat.ranges.to_add <- GenomicRanges::GRanges()
+    #pat.ranges.to_add <- list()
     new_ind <- 1
     for(j in 1:length(marker.granges_i)){
       marker.granges_ij <- marker.granges_i[j]
@@ -73,7 +79,7 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
       rel_end <- rel_start + new_grange@ranges@width
       new_grange$read <- substring(pat.granges_i$read, first = rel_start, last = rel_end)
       new_grange$nobs <- pat.granges_i$nobs
-      pat.ranges.to_add[[new_ind]] <- new_grange
+      pat.ranges.to_add[new_ind] <- new_grange
       # actual_start <- max(marker.ranges_ij@start, pat.ranges_i@start)
       # rel_start <- (actual_start - pat.ranges_i@start) + 1
       # actual_end <- min(marker.ranges_ij@start+(marker.ranges_ij@width-1), pat.ranges_i@start+(pat.ranges_i@width-1))
@@ -97,6 +103,7 @@ overlap_marker_pat <- function(pat, marker, n_threads = 1){
   }else{
     pat.ranges.split_reads <- do.call(c, res)
   }
+  #This still returns a list of granges objects...
   pat.ranges.all <- unlist(c(pat.ranges.split_reads, pat.ranges[marker.pat.overlaps.within@from]))
   
   pat.filt <- filter_pat(pat = pat.ranges.all)
