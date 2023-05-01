@@ -87,9 +87,9 @@ learn_reference <- function(marker.file,
 
     #Learn beta distribution for each maker region
     if(verbose) message("Fitting beta distributions.")
-    beta_celltype_fits[[pc]] <- fit_beta_new(overlaps.list = overlap)
+    beta_celltype_fits[[pc]] <- fit_beta(overlaps.list = overlap)
     cell_type.num <- cell_type.num + 1
-    rm(pc_pat.merged, overlap)
+    rm(pc_pat.list, pc_pat.merged, overlap)
     gc(full = T)
   }
   
@@ -106,7 +106,7 @@ learn_reference <- function(marker.file,
   }
   bad.markers <- sort(unique(bad.markers))
   
-  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
+  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits, overlap = overlap)
   
   if(save.output!=""){
     if(is.logical(save.output) & isTRUE(save.output))

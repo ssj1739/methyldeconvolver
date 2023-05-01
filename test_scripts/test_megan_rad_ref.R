@@ -2,29 +2,28 @@
 library(methyldeconvolveR)
 
 #pat.dir <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/PAT/"
-pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/"
+pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/pat/"
 #marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylomes/Marker/markers.ALL.bed"
 marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
 
 marker <- read_marker(marker.file)
 pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
 
-
-reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 12)
-saveRDS(reference, file = "~/Tools/methyldeconvolver/data/reference_3-27-23.rds")
-#reference <- readRDS("~/Data/TestMixIn/from_megan_rad/complete_reference_megan_rad_3-22-23.rds")
-
-# pat.files <- dir(pat.dir, full.names = T)
+reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 12, split_reads = F)
+saveRDS(reference, file = "~/Tools/methyldeconvolver/data/reference_4-21-23.rds")
+# reference <- readRDS("~/Tools/methyldeconvolver/data/reference_4-10-23.rds")
 # 
-# result_deconv_self <- list()
-# pb <- pbapply::startpb(min = 0, max = length(pat.files))
-# for(i in seq_along(pat.files)){
-#   pf <- pat.files[i]
-#   res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 4, num_of_inits = 1)
-#   result_deconv_self[[pf]] <- res$last_alpha
-#   pbapply::setpb(pb, value = i)
-# }
-# closepb(pb)
+# pat.files <- dir(pat.dir,pattern = "*.pat.gz$", full.names = T)
+# # 
+#  result_deconv_self <- list()
+#  pb <- pbapply::startpb(min = 0, max = length(pat.files))
+#  for(i in seq_along(pat.files)){
+#    pf <- pat.files[i]
+#    res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 4, num_of_inits = 1)
+#    result_deconv_self[[pf]] <- res$last_alpha
+#    pbapply::setpb(pb, value = i)
+#  }
+#  closepb(pb)
 # # saveRDS(result_deconv_self, file = "All_results_full_ref.rds")
 # 
 # result_deconv_self <- readRDS("data/megan_rad/All_results_full_ref.rds")
