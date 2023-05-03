@@ -11,10 +11,12 @@
 overlap_marker_pat <- function(pat, marker, split_reads = F, n_threads = 1){
   require(GenomicRanges)
   require(dplyr)
+  require(data.table)
   require(pbapply)
   
   # Convert marker to GRanges object:
   marker.ranges <- marker
+  if(!is)
   # marker.ranges <- GenomicRanges::makeGRangesFromDataFrame(marker %>% 
   #                                                            dplyr::select(-c("start", "end")), 
   #                                                          start.field = "startCpG", 
@@ -62,6 +64,14 @@ overlap_marker_pat <- function(pat, marker, split_reads = F, n_threads = 1){
   pat_ind_all <- marker.pat.overlaps.notwithin@from
   
   # Then, loop through overhanging read indices
+  pat.overhanging.dt <- as.data.table(pat)[pat_ind_all,]
+  markers.overhanging <- marker.ranges[pat_ind_all,]
+  substr(pat.dt$read)
+  
+  
+  
+  
+  
   res <- pbapply::pblapply(pat_ind_all, function(pat_ind){
     # Get pat grange object that corresponds to overhanging pat read
     pat.granges_i <- pat.ranges[pat_ind]
