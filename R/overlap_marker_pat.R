@@ -16,7 +16,6 @@ overlap_marker_pat <- function(pat, marker, split_reads = F, n_threads = 1){
   
   # Convert marker to GRanges object:
   marker.ranges <- marker
-  if(!is)
   # marker.ranges <- GenomicRanges::makeGRangesFromDataFrame(marker %>% 
   #                                                            dplyr::select(-c("start", "end")), 
   #                                                          start.field = "startCpG", 
