@@ -31,6 +31,9 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
         shape1 = NA,
         shape2 = NA,
         beta.f = NA,
+        shape1.emp = NA,
+        shape2.emp = NA,
+        beta.f.emp = NA,
         marker.index = x,
         mu = NA,
         sigma = NA
@@ -76,9 +79,9 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       #beta likeihood function to maximize
       beta_likelihood <- function(theta, x){
         N <- length(x)
-        alpha <- theta[1]
-        beta <- theta[2]
-        beta_ll <- ((alpha-1)*sum((log(x)))) + ((beta-1)*sum(log(1-x))) - N*log(beta(alpha, beta))
+        alpha.val <- theta[1]
+        beta.val <- theta[2]
+        beta_ll <- ((alpha.val-1)*sum((log(x)))) + ((beta.val-1)*sum(log(1-x))) - N*log(beta(alpha.val, beta.val))
         return(-beta_ll)
       }
       
@@ -90,11 +93,21 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       fit.mle <- tryCatch({
         res = stats::optim(par = c(0.01, 0.01), 
                          fn = beta_likelihood, 
-                         x = rep.meth.fraction, 
-                         method = "L-BFGS-B", 
-                         lower = 0.0001, upper = 10000)
+                         x = rep.meth.fraction) #, 
+                         #method = "L-BFGS-B", 
+                         #lower = 0.0001, upper = 10000)
         res$par
       }, error = function(e) return(c(NA, NA)))
+      if(all(is.na(fit.mle))){
+        if(mu > 0.5){
+          fit.mle[1] <- 10000
+          fit.mle[2] <- 0.0001
+        }else{
+          fit.mle[1] <- 0.0001
+          fit.mle[2] <- 10000
+        }
+      }
+      
       # Empirically calculate beta distr using empirical mean and variance of read level methylation fractions
       fit.emp = estBetaParams(mu, sigma)
       
