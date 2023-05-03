@@ -82,3 +82,46 @@ filter_pat <- function(pat, filter.noninf = T,
   
   return(pat.filt)
 }
+
+
+plot_beta <- function(beta_celltype_fits, rows = NA, plot.empirical = F, unique.identifier = "marker.index"){
+  if(is.na(rows)){
+    rows <- 1:nrow(beta_celltype_fits[[1]])
+  }
+  if(plot.empirical){
+    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1.emp[rows]))
+    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2.emp[rows]))
+  }else{
+    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1[rows]))
+    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2[rows]))
+  }
+  
+  if(!is.null(dim(shape1))){
+    if(length(colnames(shape1))>0)
+      name <- rep(colnames(shape1), each = nrow(shape1))
+  }else{
+    if(length(names(shape1))>0){
+      name <- names(shape1)
+    }else{
+      name <- NULL
+    }
+  }
+  
+  if(!is.na(unique.identifier)){
+    id <- sapply(beta_celltype_fits, function(x) return(x[[unique.identifier]][rows]))
+  }else{
+    id <- 1:length(shape1)
+  }
+  
+  df <- data.frame(
+    name = name,
+    id = id,
+    shape1 = shape1,
+    shape2 = shape2
+  )
+  
+  ggplot(data = df, aes(color = name, text = id)) +
+    geom_density(stat = stat_)
+    
+  
+}

@@ -57,13 +57,16 @@ deconvolute_sample <- function(sample_pat,
     if(!file.exists(sample_pat))
       stop("\nNo such PAT file or dataframe exists.")
   }
-    
+  
+  # Check available cores (n), do not exceed n-1 cores.
   if(n_threads > parallel::detectCores()){
     if(!quiet) message(paste0("Max number of threads detected is ", 
                               parallel::detectCores(), 
                               ". Using one less than that number instead."))
     n_threads <- parallel::detectCores()-1
   }
+  
+  # Default to n_threads=1 if platform is not unix
   if(.Platform$OS.type!="unix"){
     n_threads <- 1
     if(!quiet) message("To use multi-core capability of pbapply,
@@ -81,7 +84,7 @@ deconvolute_sample <- function(sample_pat,
     }
   }
   # Align markers to reads on PAT file
-  omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker, n_threads = n_threads)
+  omp <- overlap_marker_pat(pat = sample_pat, marker = reference$marker, n_threads = n_threads, split_reads = F)
   
   # Calculate coverage at each marker region
   omp$marker.gr$num_of_reads_per_marker <- sapply(1:length(omp$marker.gr), function(i){
@@ -117,6 +120,7 @@ deconvolute_sample <- function(sample_pat,
     
     
     psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[omp$overlaps@to[i]])))
+    psi.vec <- ifelse(is.na(beta.f), 0, 1)
     meth.frac = sum(r.vec) / length(r.vec)
     
     # For all cell types, iterate through each cell type c

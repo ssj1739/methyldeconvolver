@@ -106,7 +106,7 @@ learn_reference <- function(marker.file,
   }
   bad.markers <- sort(unique(bad.markers))
   
-  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits, overlap = overlap)
+  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
   
   if(save.output!=""){
     if(is.logical(save.output) & isTRUE(save.output))
