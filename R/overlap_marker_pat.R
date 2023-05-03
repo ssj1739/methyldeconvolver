@@ -64,10 +64,10 @@ overlap_marker_pat <- function(pat, marker, split_reads = F, n_threads = 1){
   pat_ind_all <- marker.pat.overlaps.notwithin@from
   
   # Then, loop through overhanging read indices
-  pat.overhanging.dt <- as.data.table(pat)[pat_ind_all,]
-  markers.overhanging <- marker.ranges[pat_ind_all,]
-  substr(pat.dt$read)
-  
+  # pat.overhanging.dt <- as.data.table(pat)[pat_ind_all,]
+  # markers.overhanging <- marker.ranges[pat_ind_all,]
+  # substr(pat.dt$read)
+  # 
   
   
   
