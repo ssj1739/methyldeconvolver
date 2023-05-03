@@ -9,7 +9,7 @@ marker.file <- "~/Documents/Research/Wellstein/Projects/Megan_Radiation/Methylom
 marker <- read_marker(marker.file)
 pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
 
-reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 12, split_reads = F)
+reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 6, split_reads = F)
 saveRDS(reference, file = "~/Tools/methyldeconvolver/data/reference_4-21-23.rds")
 # reference <- readRDS("~/Tools/methyldeconvolver/data/reference_4-10-23.rds")
 
