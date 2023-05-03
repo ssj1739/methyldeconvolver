@@ -59,7 +59,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
     # and not at least 2 unique values (not all 0s or all 1s), then consider modeling the marker:
     ### NOTE: Come back to the filtering step here.
     
-    if(length(rep.meth.fraction) >= 3){
+    if(length(rep.meth.fraction) >= 10){
       #method of moments beta distr
       estBetaParams <- function(mu, var) {
         alpha <- (((1 - mu) / var) - (1 / mu)) * mu ^ 2
