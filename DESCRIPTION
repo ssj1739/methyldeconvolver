@@ -1,14 +1,14 @@
 Package: methyldeconvolveR
 Type: Package
 Title: Reference-based deconvolution of tissues using DNA methylation
-Version: 0.2.12
+Version: 0.2.14
 Authors@R: 
   c(
     person("Sidharth Singh", "Jain", email = "sidharthsjain@gmail.com", role = c("aut","cre"), comment = c("ORCID" = "0000-0000-0000-0000")), 
     person("Arthur Patrick", "McDeed", email = "apm116@georgetown.edu", role = c("aut"), comment = c("ORCID" = "0000-0000-0000-0000"))
   )
 Maintainer: Sidharth Singh Jain <sidharthsjain@gmail.com>
-Description: Deconvolution of bisulfite-treated whole genome bisulfite sequenced 
+Description: Deconvolution of whole genome bisulfite sequencing 
   methylation data from bulk into individual cell types using a multinomial model. 
   Inference of cell type proportions is performed using the expectation-maximization algorithm.
 License: MIT + file LICENSE

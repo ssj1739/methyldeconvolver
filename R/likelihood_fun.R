@@ -7,7 +7,7 @@
 #' @return log-likelihood of input alpha value
 #' @export
 #'
-likelihood_fun <- function(psi, alpha, epsilon = 1e-7){
+likelihood_fun <- function(psi, alpha, epsilon = 1e-99){
   stopifnot(length(alpha) == ncol(psi))
   
   log_alpha <- log(alpha)

@@ -118,6 +118,8 @@ deconvolute_sample <- function(sample_pat,
       beta.f = sapply(reference$beta_celltype_fits, function(x) return(x$beta.f[omp$overlaps@to[i]]))
     }
     
+    # TODO: TEMPORARY FIX - replace beta.f values of 0 with small number
+    beta.f[beta.f == 0] <- 1e-100
     
     psi.vec = unlist(sapply(reference$beta_celltype_fits, function(x) return(x$psi.init[omp$overlaps@to[i]])))
     psi.vec <- ifelse(is.na(beta.f), 0, 1)
@@ -210,6 +212,7 @@ deconvolute_sample <- function(sample_pat,
   updated_alphas <- xapply(alpha.inits, function(alpha){
     i.iter = 1
     mad = vector()
+    ll = vector()
     mad[1] <- 1
     all.alphas <- list()
     all.alphas[[i.iter]] <- alpha
@@ -217,13 +220,16 @@ deconvolute_sample <- function(sample_pat,
     while(i.iter < max_iter & mad[i.iter] > tol){
       # Save old alpha
       alpha.old = alpha
-     
+    
       transpose_prod <- sweep(psi.mat, MARGIN = 2, alpha.old, '*')
       phi <- transpose_prod/rowSums(transpose_prod)
 
       # Calculate new alpha
       cs = colSums(phi * sample_pat$nobs[omp$overlaps@from])
       new.alpha <- cs / sum(cs)
+      
+      # Calculate log-likelihood
+      ll[i.iter] = likelihood_fun(psi = psi.mat, alpha = new.alpha, epsilon = 1e-99)
       
       # Increment iteration
       i.iter = i.iter + 1
@@ -234,7 +240,7 @@ deconvolute_sample <- function(sample_pat,
       all.alphas[[i.iter]] <- alpha
     }
     
-    ll = likelihood_fun(psi = psi.mat, alpha = alpha)
+
     
     output = list(last_alpha = alpha, iter_mad = mad, loglik = ll)
     
@@ -246,7 +252,7 @@ deconvolute_sample <- function(sample_pat,
   
   output <- list(result = updated_alphas)
   
-  max_ll <- which.max(sapply(updated_alphas, `[[`, "loglik"))
+  max_ll <- which.max(sapply(updated_alphas, function(x) max(x[["loglik"]])))
   
   if(!is.na(calculate_confidence_int)){
     if(!is.numeric(calculate_confidence_int) | calculate_confidence_int > 1 | calculate_confidence_int < 0)

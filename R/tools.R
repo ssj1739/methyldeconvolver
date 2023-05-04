@@ -84,16 +84,13 @@ filter_pat <- function(pat, filter.noninf = T,
 }
 
 
-plot_beta <- function(beta_celltype_fits, rows = NA, plot.empirical = F, unique.identifier = "marker.index"){
-  if(is.na(rows)){
-    rows <- 1:nrow(beta_celltype_fits[[1]])
-  }
+plot_beta <- function(beta_celltype_fits, row.ind = 1, plot.empirical = F, unique.identifier = "marker.index"){
   if(plot.empirical){
-    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1.emp[rows]))
-    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2.emp[rows]))
+    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1.emp[row.ind]))
+    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2.emp[row.ind]))
   }else{
-    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1[rows]))
-    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2[rows]))
+    shape1 = sapply(beta_celltype_fits, function(x) return(x$shape1[row.ind]))
+    shape2 = sapply(beta_celltype_fits, function(x) return(x$shape2[row.ind]))
   }
   
   if(!is.null(dim(shape1))){
@@ -108,7 +105,7 @@ plot_beta <- function(beta_celltype_fits, rows = NA, plot.empirical = F, unique.
   }
   
   if(!is.na(unique.identifier)){
-    id <- sapply(beta_celltype_fits, function(x) return(x[[unique.identifier]][rows]))
+    id <- sapply(beta_celltype_fits, function(x) return(x[[unique.identifier]][row.ind]))
   }else{
     id <- 1:length(shape1)
   }
@@ -120,8 +117,10 @@ plot_beta <- function(beta_celltype_fits, rows = NA, plot.empirical = F, unique.
     shape2 = shape2
   )
   
+  apply(df, )
+  
   ggplot(data = df, aes(color = name, text = id)) +
-    geom_density(stat = stat_)
+    stat_function(fun = dbeta, args = list(shape1 = shape1, shape2 = shape2), xlim = c(0,1))
     
   
 }
