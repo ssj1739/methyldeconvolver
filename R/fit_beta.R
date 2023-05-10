@@ -64,18 +64,21 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       estBetaParams <- function(mu, var) {
         alpha <- (((1 - mu) / var) - (1 / mu)) * mu ^ 2
         beta <- alpha * (1 / mu - 1)
-        if(is.infinite(abs(alpha))){
+        if(alpha < 0 | beta < 0){
+          
+        }
+        if(is.infinite(abs(alpha)) | is.nan(alpha)){
           if(mu > 0.5){
-            alpha <- 10000
-            beta <- 0.0001
+            alpha <- 20
+            beta <- 0.05
           }else{
-            alpha <- 0.0001
-            beta <- 10000
+            alpha <- 0.05
+            beta <- 20
           }
         }
         return(params = c(alpha, beta))
       }
-      
+    
       #beta likeihood function to maximize
       beta_likelihood <- function(theta, x){
         N <- length(x)
@@ -89,6 +92,11 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       mu <- mean(rep.meth.fraction)
       sigma <- var(rep.meth.fraction)
       
+      # Set lower bound on sigma
+      if(sigma < 1e-4){
+        sigma <- 1e-4
+      }
+      
       # Fit beta distr by mle using beta likelihood function and optim function with L-BFGS-B method
       fit.mle <- tryCatch({
         res = stats::optim(par = c(0.01, 0.01), 
@@ -100,12 +108,20 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
       }, error = function(e) return(c(NA, NA)))
       if(all(is.na(fit.mle))){
         if(mu > 0.5){
-          fit.mle[1] <- 10000
-          fit.mle[2] <- 0.0001
+          fit.mle[1] <- 20
+          fit.mle[2] <- 0.05
         }else{
-          fit.mle[1] <- 0.0001
-          fit.mle[2] <- 10000
+          fit.mle[1] <- 0.05
+          fit.mle[2] <- 20
         }
+      }
+      if(mu > 0.9999){
+        fit.mle[1] <- 20
+        fit.mle[2] <- 0.05
+      }
+      if(mu < 0.0001){
+        fit.mle[1] <- 0.05
+        fit.mle[2] <- 20
       }
       
       # Empirically calculate beta distr using empirical mean and variance of read level methylation fractions
@@ -119,7 +135,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
     #return both mle and mme estimates with meta data
     return(data.frame(shape1 = fit.mle[1], shape2 = fit.mle[2], beta.f = beta.f, 
                       shape1.emp = fit.emp[1], shape2.emp = fit.emp[2], beta.f.emp = beta.f.emp,
-                      marker.index = x, mu = mu, sigma = sigma))
+                      marker.index = x, mu = mu, sigma = sigma, n = length(rep.meth.fraction)))
   }) %>%
     dplyr::bind_rows() %>%
     dplyr::select(-dplyr::starts_with("X")) %>%

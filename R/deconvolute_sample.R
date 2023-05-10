@@ -228,6 +228,10 @@ deconvolute_sample <- function(sample_pat,
       cs = colSums(phi * sample_pat$nobs[omp$overlaps@from])
       new.alpha <- cs / sum(cs)
       
+      # Store new alpha
+      alpha = new.alpha
+      all.alphas[[i.iter]] <- alpha
+      
       # Calculate log-likelihood
       ll[i.iter] = likelihood_fun(psi = psi.mat, alpha = new.alpha, epsilon = 1e-99)
       
@@ -236,8 +240,6 @@ deconvolute_sample <- function(sample_pat,
       
       # Check our threshold of mad
       mad[i.iter] = mean(abs(alpha.old - new.alpha))/mean(new.alpha)
-      alpha = new.alpha
-      all.alphas[[i.iter]] <- alpha
     }
     
 
