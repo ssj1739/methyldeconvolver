@@ -7,11 +7,11 @@ pat.dir <- "~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_refe
 marker.file <- "~/Data/TestMixIn/from_megan_rad/Markers/FinalMarkers/markers.ALL.bed"
 
 marker <- read_marker(marker.file)
-pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
+pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = T)
 
 reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 6, split_reads = F)
-saveRDS(reference, file = "~/Tools/methyldeconvolver/data/reference_4-21-23.rds")
-# reference <- readRDS("~/Tools/methyldeconvolver/data/reference_4-10-23.rds")
+saveRDS(reference, file = "data/reference_5-10-23.rds")
+reference <- readRDS("data/reference_5-9-23.rds")
 
 # 
 pat.files <- dir(pat.dir,pattern = "*.pat.gz$", full.names = T)
@@ -20,7 +20,7 @@ pat.files <- dir(pat.dir,pattern = "*.pat.gz$", full.names = T)
  pb <- pbapply::startpb(min = 0, max = length(pat.files))
  for(i in seq_along(pat.files)){
    pf <- pat.files[i]
-   res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 4, num_of_inits = 1)
+   res <- deconvolute_sample(sample_pat = pf, reference = reference, n_threads = 4, num_of_inits = 100)
    result_deconv_self[[pf]] <- res$last_alpha
    pbapply::setpb(pb, value = i)
  }

@@ -27,7 +27,8 @@ learn_reference <- function(marker.file,
                             split_reads = F,
                             filter.inf.length = 3,
                             filter.length = 3,
-                            filter.noninf = T){
+                            filter.noninf = T,
+                            min.cell.param = NA){
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
@@ -98,15 +99,19 @@ learn_reference <- function(marker.file,
   #   as.data.frame() %>%
   #   select(chr, startCpG, endCpG, target)
   
-  #Identify cell/marker pairs with insufficient reference data or unable to fit beta                                
-  bad.markers <- c()
-  for(cell_type in names(beta_celltype_fits)){
-    beta_celltype_fits_subset <- beta_celltype_fits[[cell_type]][marker.subset$target==cell_type,]
-    bad.markers <- c(bad.markers, beta_celltype_fits_subset$marker.index[beta_celltype_fits_subset$psi.init==0])
+  #Identify cell/marker pairs with insufficient reference data or unable to fit beta     
+  #TODO: Make sure this works!
+  if(is.na(min.cell.param)){
+    # by default, set to 20% of cell types
+    min.cell.param <- round(0.2 * length(beta_celltype_fits))
   }
-  bad.markers <- sort(unique(bad.markers))
+   
+  psi.mat.init <- sapply(beta_celltype_fits, function(x) return(x$psi.init)) 
+  bad.markers <- which(rowSums(psi.mat.init) < min.cell.param) # markers where no information was learned for any cell type
+  marker.out <- marker[-bad.markers,]
+  beta_celltype_fits.out <- lapply(beta_celltype_fits, function(x) x[-bad.markers,])
   
-  output <- list(marker = marker, beta_celltype_fits = beta_celltype_fits)
+  output <- list(marker = marker.out, beta_celltype_fits = beta_celltype_fits.out)
   
   if(save.output!=""){
     if(is.logical(save.output) & isTRUE(save.output))

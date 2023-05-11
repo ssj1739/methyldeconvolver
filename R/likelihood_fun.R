@@ -14,7 +14,11 @@ likelihood_fun <- function(psi, alpha, epsilon = 1e-99){
   psi[psi == 0] <- epsilon
   log_psi <- log(psi)
   
-  sum_mat <- t(t(log_psi) + log_alpha)
   
-  return(sum(rowSums(sum_mat)))
+  ll <- sum(rowSums(log_psi)) + sum(log_alpha)
+  
+  # sum_mat <- t(t(log_psi) + log_alpha)
+  # ll <- sum(rowSums(sum_mat, na.rm = T))
+  
+  return(ll)
 }
