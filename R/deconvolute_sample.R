@@ -38,7 +38,7 @@ deconvolute_sample <- function(sample_pat,
                                output_format = "all",
                                num_of_inits = 10, 
                                max_iter = 100,
-                               use.empirical = T,
+                               use.empirical = F,
                                calculate_confidence_int = NA,
                                n_threads = 1){
   if(require(pbapply)){
@@ -129,7 +129,7 @@ deconvolute_sample <- function(sample_pat,
     for(c in seq_along(psi.vec)){
       if(psi.vec[c]!=0){
         #P = dbinom(x = sum(r.vec), size = length(r.vec), prob = meth.frac[[c]])
-        
+
         # For each CpG site r.i in read r (represented in r.vec)
         for(r.i in r.vec){
           # Compute P from the beta function
@@ -241,8 +241,6 @@ deconvolute_sample <- function(sample_pat,
       # Check our threshold of mad
       mad[i.iter] = mean(abs(alpha.old - new.alpha))/mean(new.alpha)
     }
-    
-
     
     output = list(last_alpha = alpha, iter_mad = mad, loglik = ll)
     

@@ -10,7 +10,7 @@ marker <- read_marker(marker.file)
 pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = T)
 
 reference <- learn_reference(marker.file = marker.file, pat.dir = pat.dir, verbose = T, n_threads = 6, split_reads = F)
-saveRDS(reference, file = "data/reference_5-9-23.rds")
+saveRDS(reference, file = "data/reference_5-10-23.rds")
 reference <- readRDS("data/reference_5-9-23.rds")
 
 # 
