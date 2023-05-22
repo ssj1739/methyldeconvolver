@@ -28,18 +28,21 @@ learn_reference <- function(marker.file,
                             filter.inf.length = 3,
                             filter.length = 3,
                             filter.noninf = T,
-                            min.cell.param = NA){
+                            min.cell.param = NA, ...){
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
-  marker = read_marker(marker.file)
+  marker = read_marker(marker.file, header = T, sep = " ")
   
   # Identify # of Pat files in pat.dir, ensure correct formats
   pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
-  pat.cell_types <- tolower(sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1]))
+  pat.cell_types <- sapply(pat.files, function(x) strsplit(x, split = "_")[[1]][1]) %>%
+    tolower() %>% 
+    gsub(pattern = "[[:punct:]]", replacement = "") %>%
+    gsub(pattern = " ", replacement = "")
   
   # Verify that all PAT file cell types are contained in the marker file "targets" column
-  missing_pats <- which(!tolower(pat.cell_types) %in% tolower(marker$target)) # Use `tolower` to normalize case mismatch
+  missing_pats <- which(!tolower(pat.cell_types) %in% tolower(marker$label)) # Use `tolower` to normalize case mismatch
   if(length(missing_pats)>0){
     if(verbose){
       message("The following PAT files represent cell types not found in the marker file:")

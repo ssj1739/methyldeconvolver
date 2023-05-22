@@ -76,20 +76,32 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' \dontrun{
 #' read_marker(path = "inst_data/human_mixintest_top25.txt")
 #' }
-read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F, sep = '\t'){
+read_marker <- function(path="", no_reduction = F, header = T, sep = "\t"){
   require(data.table)
   require(GenomicRanges)
   require(tidyverse)
   
-  #marker = data.table::fread(path, nrows = Inf, header = F)
-  marker = read.table(file = path, header = F, sep = sep)
+  #marker = data.table::fread(path, header = header, skip = "#")
+  marker = read.table(file = path, header = header, sep = sep, comment.char = "#")
   if(!grepl("[1-9]",marker[1,1])){
     marker <- marker[2:nrow(marker),]
   }
-  colnames(marker)[1:8] <- c("chr", "startChr", "endChr", "startCpG", "endCpG", "target", "name", "direction")
+  if(!"label" %in% colnames(marker)){
+    # Assume default marker output
+    # TODO: Assess if these colnames would be correct somehow?
+    colnames(marker)[1:6] <- c("chr", "startChr", "endChr", "startCpG", "endCpG", "label")
+  }
+  if(any(c("start", "end") %in% colnames(marker))){
+    which.start <- which(colnames(marker) %in% c("start"))
+    which.end <- which(colnames(marker) %in% c("end"))
+    colnames(marker)[which.start] <- "startChr"
+    colnames(marker)[which.end] <- "endChr"
+  }
 
-  # Normalize case of target cell types
-  marker$target <- tolower(marker$target)
+  # Normalize case and punctuation of target cell types
+  marker$label <- marker$label %>% tolower() %>% 
+    gsub(pattern = "[[:punct:]]", replacement = "") %>%
+    gsub(pattern = " ", replacement = "")
   
   # Merge overlapping marker regions
   marker.gr <- GenomicRanges::makeGRangesFromDataFrame(marker, 
@@ -108,19 +120,28 @@ read_marker <- function(path="data/Human_mixintest_top25.txt", no_reduction = F,
   reannotate.target <- character(length(marker.gr.red))
   reannotate.oi <- character(length(marker.gr.red))
   reannotate.n_merged <- numeric(length(marker.gr.red))
+  reannotate.p.value <- reannotate.q.value <- numeric(length(marker.gr.red))
+  
   for(i in 1:length(marker.gr.red)){
     original.ind <- reannotate.ol@to[reannotate.ol@from==i]
-    reannotate.target[i] <- paste0(unique(marker.gr$target[original.ind]), collapse = ",")
+    reannotate.target[i] <- paste0(unique(marker.gr$label[original.ind]), collapse = ",")
     reannotate.oi[i] <- paste0(original.ind, collapse = ',')
     reannotate.n_merged[i] <- length(original.ind)
+    if("p.value" %in% colnames(mcols(marker.gr)))
+      reannotate.p.value[i] <- paste0(marker.gr$p.value[original.ind], collapse = ",")
+    if("q.value" %in% colnames(mcols(marker.gr)))
+      reannotate.q.value[i] <- paste0(marker.gr$q.value[original.ind], collapse = ",")
   }
   
-  marker.gr.red$target <- reannotate.target
+  marker.gr.red$label <- reannotate.target
   marker.gr.red$original.ind <- reannotate.oi
   marker.gr.red$n_merged <- reannotate.n_merged
   
+  if("p.value" %in% colnames(mcols(marker.gr)))
+    marker.gr.red$p.val <- reannotate.p.value
+  if("q.value" %in% colnames(mcols(marker.gr)))
+    marker.gr.red$q.val <- reannotate.q.value
   
-  out_marker <- marker.gr.red
-  return(out_marker)
+  return(marker.gr.red)
 }
 

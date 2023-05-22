@@ -40,6 +40,8 @@ filter_pat <- function(pat, filter.noninf = T,
                        filter.length = 3, 
                        filter.inf.length = 3,
                        output.as.granges = F, verbose = F){
+  require(dplyr)
+  require(stringr)
   
   if("GRanges" %in% class(pat)){
     output.as.granges = T
@@ -59,7 +61,7 @@ filter_pat <- function(pat, filter.noninf = T,
   
   # Filtering PAT files by number of informative CpGs
   pat.filt <- pat.filt %>%
-    dplyr::filter(str_count(string = read, pattern = "C|T") > filter.inf.length)
+    dplyr::filter(stringr::str_count(string = read, pattern = "C|T") > filter.inf.length)
   
   if(verbose){
     message("Finished filtering.")
