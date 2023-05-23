@@ -32,7 +32,7 @@ learn_reference <- function(marker.file,
   
   # Preprocess marker, ensure correct format
   if(verbose) message("Reading in marker file")
-  marker = read_marker(marker.file, header = T, sep = " ")
+  marker = read_marker(marker.file, ...)
   
   # Identify # of Pat files in pat.dir, ensure correct formats
   pat.files = dir(pattern = "*.pat.gz$", pat.dir, full.names = F)
