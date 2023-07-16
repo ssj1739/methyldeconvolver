@@ -80,6 +80,7 @@ read_marker <- function(path="", no_reduction = F, header = T, sep = "\t"){
   require(data.table)
   require(GenomicRanges)
   require(tidyverse)
+  require(pbapply)
   
   #marker = data.table::fread(path, header = header, skip = "#")
   marker = read.table(file = path, header = header, sep = sep, comment.char = "#")
@@ -122,6 +123,7 @@ read_marker <- function(path="", no_reduction = F, header = T, sep = "\t"){
   reannotate.n_merged <- numeric(length(marker.gr.red))
   reannotate.p.value <- reannotate.q.value <- numeric(length(marker.gr.red))
   
+  pb <- pbapply::startpb(min = 0, max = length(marker.gr.red))
   for(i in 1:length(marker.gr.red)){
     original.ind <- reannotate.ol@to[reannotate.ol@from==i]
     reannotate.target[i] <- paste0(unique(marker.gr$label[original.ind]), collapse = ",")
@@ -131,6 +133,7 @@ read_marker <- function(path="", no_reduction = F, header = T, sep = "\t"){
       reannotate.p.value[i] <- paste0(marker.gr$p.value[original.ind], collapse = ",")
     if("q.value" %in% colnames(mcols(marker.gr)))
       reannotate.q.value[i] <- paste0(marker.gr$q.value[original.ind], collapse = ",")
+    pbapply::setpb(pb, value = i)
   }
   
   marker.gr.red$label <- reannotate.target
