@@ -36,11 +36,14 @@ learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output =
 ```
 
 ## Deconvolute Sample
-
-
+Deconvolution algorithm for a single liquid biopsy sample. Requires a path to sample in PAT format and reference .rds object.
+Default "simple" output is a named vector of cell-type proportion estimates that maximize the log-likelihood function.
+EM initializations and stopping criteria can be adjusted by the user from defaults.
+Multiple threads/cores can be used to parallelize computations by specifying --n_threads
 
 ``` r
-
+ref = "/path/to/reference/reference.rds"
+deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
 ```
 
 
