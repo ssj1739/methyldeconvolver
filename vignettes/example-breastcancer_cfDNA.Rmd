@@ -1,0 +1,36 @@
+---
+title: "example-breastcancer_cfDNA"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example-breastcancer_cfDNA}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Background
+
+To test the `methyldeconvolveR` package, we used publicly available liquid biopsy data (methylated cfDNA) from [Hai et al. 2022 MedComm](https://doi.org/10.1002/mco2.134). In short, liquid biopsies were collected from patients with various breast cancer subtypes. Data was openly available for download from the NCBI SRA database, [SRP167041](https://trace.ncbi.nlm.nih.gov/Traces/?view=study&acc=SRP167041).
+
+We curated a set of reference data, as described in [McNamara et al. 2023, JCI Insight](https://doi.org/10.1172/jci.insight.156529), and learned reference parameters (see the "Learn Reference" vignette), which we use for deconvolution. The reference atlas included as part of the package include all cell types described in the manuscript with the top 100 markers.
+
+### Rationale
+
+In this vignette, we show how to use `methyldeconvolveR` to perform cell type deconvolution from liquid biopsy samples. First, we load the relevant packages.
+
+```{r setup}
+library(methyldeconvolveR)
+library(tidyverse) # For data cleaning, processing, and visualization
+```
+
+```{r load_data}
+# First, load the generated or pre-existing reference
+data("reference", package = "methyldeconvolveR")
+```
+

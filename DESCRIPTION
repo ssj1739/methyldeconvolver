@@ -1,7 +1,7 @@
 Package: methyldeconvolveR
 Type: Package
 Title: Reference-based deconvolution of tissues using DNA methylation
-Version: 0.2.17
+Version: 0.3
 Authors@R: 
   c(
     person("Sidharth Singh", "Jain", email = "sidharthsjain@gmail.com", role = c("aut","cre"), comment = c("ORCID" = "0000-0000-0000-0000")), 
@@ -11,7 +11,7 @@ Maintainer: Sidharth Singh Jain <sidharthsjain@gmail.com>
 Description: Deconvolution of whole genome bisulfite sequencing 
   methylation data from bulk into individual cell types using a multinomial model. 
   Inference of cell type proportions is performed using the expectation-maximization algorithm.
-License: MIT + file LICENSE
+License: file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
@@ -27,5 +27,8 @@ Packaged: 2022-04-22 13:52:53 UTC; sidharthjain
 Depends: R (>= 3.5.0)
 Suggests: 
     testthat (>= 3.0.0),
-    pbapply
+    pbapply,
+    knitr,
+    rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
