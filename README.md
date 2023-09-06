@@ -19,38 +19,31 @@ You can install the development version of methyldeconvolveR from
 devtools::install_github("ssj1739/methyldeconvolver")
 ```
 
-## Example
+## Learn Reference
 
-This is a basic example which shows you how to solve a common problem:
+Learn a reference set from given reference pat files of cell types of interest. Requires path to a marker file, path to PAT file directory, and output directory.
+
+Note: Name formats of the reference PAT files should follow the following convention:
+  - Files should end in .pat.gz (bgzipped PAT files outputted from wgbstools).
+  - Files should have the name of the cell type (which perfectly matches the name in the marker file)
+    followed by an underscore, followed by any other names.
+  - e.g. Bcell_Sample_Name.pat.gz
 
 ``` r
 library(methyldeconvolveR)
 ## basic example code
+learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
 ```
 
-What is special about using `README.Rmd` instead of just `README.md`?
-You can include R chunks like so:
+## Deconvolute Sample
+Deconvolution algorithm for a single liquid biopsy sample. Requires a path to sample in PAT format and reference .rds object.
+  - Default "simple" output is a named vector of cell-type proportion estimates that maximize the log-likelihood function.
+  - EM initializations and stopping criteria can be adjusted by the user from defaults.
+  - Multiple threads/cores can be used to parallelize computations by specifying --n_threads
 
 ``` r
-summary(cars)
-#>      speed           dist       
-#>  Min.   : 4.0   Min.   :  2.00  
-#>  1st Qu.:12.0   1st Qu.: 26.00  
-#>  Median :15.0   Median : 36.00  
-#>  Mean   :15.4   Mean   : 42.98  
-#>  3rd Qu.:19.0   3rd Qu.: 56.00  
-#>  Max.   :25.0   Max.   :120.00
+ref = "/path/to/reference/reference.rds"
+deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
 ```
 
-You’ll still need to render `README.Rmd` regularly, to keep `README.md`
-up-to-date. `devtools::build_readme()` is handy for this. You could also
-use GitHub Actions to re-render `README.Rmd` every time you push. An
-example workflow can be found here:
-<https://github.com/r-lib/actions/tree/v1/examples>.
 
-You can also embed plots, for example:
-
-<img src="man/figures/README-pressure-1.png" width="100%" />
-
-In that case, don’t forget to commit and push the resulting figure
-files, so they display on GitHub and CRAN.
