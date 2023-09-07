@@ -1,4 +1,3 @@
-*.pat.gz
 .Rproj.user
 .Rproj.user/*
 inst/doc

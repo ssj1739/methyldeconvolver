@@ -2,7 +2,7 @@
 library(methyldeconvolveR)
 library(tidyverse)
 
-reference <- readRDS("~/Tools/methyldeconvolver/data/reference_margin0.4.ALL_0723.rds")
+#reference <- readRDS("~/Tools/methyldeconvolver/data/reference_margin0.4.ALL_0723.rds")
 reference <- readRDS("~/Data/TestMixIn/from_megan_rad/Reference/ALL/CopyPAT/final_PAT_reference_SJ_Jan2023/reference/reference_0723/em/reference_margin0.3.top100_0723.rds")
 
 sample_pats <- dir(path = "~/Data/breastcancer_SRP167041", pattern = ".pat.gz$", recursive = T, full.names = T)
@@ -18,7 +18,11 @@ sample_annot$Subtype <- sapply(sample_annot$Isolate, function(x){
   substr(y, start = 3, stop = nchar(y))
 })
 
-result <- pblapply(sample_pats, FUN = deconvolute_sample, reference = reference, quiet = F, n_threads = 1, cl = length(sample_pats))
+
+pat.list <- sapply(sample_pats, read_pat)
+
+
+result <- pblapply(sample_pats, FUN = deconvolute_sample, reference = reference, quiet = F, n_threads = 1, cl = 10)
  
 # result <- list()
 # for(sample in sample_pats){
@@ -36,7 +40,7 @@ annot.result.df <- result.df %>% pivot_longer(cols = -cell.type, names_to = "Sam
 res_fig <- ggplot(data = annot.result.df, aes(x = Sample, y = Prop, fill = cell.type)) +
   geom_bar(stat = "identity", color = "black") +
   ggnewscale::new_scale_fill() +
-  geom_tile(aes(x = Sample, y = -1, fill = Subtype)) +
+  geom_tile(aes(x = Sample, y = -0.1, fill = Subtype, height = 0.1)) +
   ggpubr::theme_pubr(x.text.angle = 90)
  
-ggsave(res_fig, filename = "figs/BrCa_res_deconv_test.pdf", width = 8, height = 10)
+ggsave(res_fig, filename = "figs/BrCa_res_deconv_test_9-6.pdf", width = 15, height = 10)
