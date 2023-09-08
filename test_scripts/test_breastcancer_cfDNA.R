@@ -22,6 +22,7 @@ sample_annot$Subtype <- sapply(sample_annot$Isolate, function(x){
 pat.list <- sapply(sample_pats, read_pat)
 
 
+
 result <- pblapply(sample_pats, FUN = deconvolute_sample, reference = reference, quiet = F, n_threads = 1, cl = 10)
  
 # result <- list()
@@ -37,10 +38,13 @@ result.df <- result.df %>% rownames_to_column(var = "cell.type")
 annot.result.df <- result.df %>% pivot_longer(cols = -cell.type, names_to = "Sample", values_to = "Prop") %>%
   merge(., sample_annot, by.x = "Sample", by.y = "Run")
 
-res_fig <- ggplot(data = annot.result.df, aes(x = Sample, y = Prop, fill = cell.type)) +
+res_fig <- ggplot(data = annot.result.df %>%
+                    mutate(Subtype = as.factor(Subtype)) %>%
+                    arrange(Subtype), aes(x = Sample, y = Prop, fill = cell.type)) +
   geom_bar(stat = "identity", color = "black") +
   ggnewscale::new_scale_fill() +
   geom_tile(aes(x = Sample, y = -0.1, fill = Subtype, height = 0.1)) +
+  scale_x_discrete(g) +
   ggpubr::theme_pubr(x.text.angle = 90)
  
 ggsave(res_fig, filename = "figs/BrCa_res_deconv_test_9-6.pdf", width = 15, height = 10)
