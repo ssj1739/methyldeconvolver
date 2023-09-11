@@ -9,7 +9,6 @@
 #' @param n_threads integer - number of threads to 
 #'
 #' @return list of alpha from each initialization.
-#' @export
 #'
 #' @examples
 #' \dontrun{
