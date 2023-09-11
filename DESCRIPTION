@@ -5,13 +5,13 @@ Version: 0.3
 Authors@R: 
   c(
     person("Sidharth Singh", "Jain", email = "sidharthsjain@gmail.com", role = c("aut","cre"), comment = c("ORCID" = "0000-0000-0000-0000")), 
-    person("Arthur Patrick", "McDeed", email = "apm116@georgetown.edu", role = c("aut"), comment = c("ORCID" = "0000-0000-0000-0000"))
+    person("Arthur Patrick IV", "McDeed", email = "apm116@georgetown.edu", role = c("aut"), comment = c("ORCID" = "0000-0000-0000-0000"))
   )
 Maintainer: Sidharth Singh Jain <sidharthsjain@gmail.com>
-Description: Deconvolution of whole genome bisulfite sequencing 
+Description: Deconvolution of whole genome 
   methylation data from bulk into individual cell types using a multinomial model. 
   Inference of cell type proportions is performed using the expectation-maximization algorithm.
-License: file LICENSE
+License: Apache License (>= 2)
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.3
