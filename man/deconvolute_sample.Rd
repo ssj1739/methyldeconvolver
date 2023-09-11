@@ -13,6 +13,7 @@ deconvolute_sample(
   output_format = "all",
   num_of_inits = 10,
   max_iter = 100,
+  use.empirical = F,
   calculate_confidence_int = NA,
   n_threads = 1
 )
@@ -20,7 +21,7 @@ deconvolute_sample(
 \arguments{
 \item{sample_pat}{Path to sample PAT file (output from wgbstools)}
 
-\item{reference}{Output from \code{\link{learn_reference}} function.}
+\item{reference}{Output from \code{\link[=learn_reference]{learn_reference()}} function.}
 
 \item{filter_reads_with_n_cpgs}{integer - pass to filter.length, filter reads from PAT file with less than n CpG sites. Default 3.}
 
@@ -28,18 +29,18 @@ deconvolute_sample(
 
 \item{retain_alphas}{logical - should alphas from each iteration be saved? Default is FALSE.}
 
-\item{output_format}{Default is "all". Change to "simple" for only named vector 
+\item{output_format}{Default is "all". Change to "simple" for only named vector
 of proportion estimates}
 
-\item{num_of_inits}{numeric - how many random prior initializations to set 
+\item{num_of_inits}{numeric - how many random prior initializations to set
 for the EM approach. Default is 1 (uniform prior).}
 
-\item{max_iter}{numeric - how many iterations of EM should be the maximum 
+\item{max_iter}{numeric - how many iterations of EM should be the maximum
 (Default is 100 - convergence usually achieved before this)}
 
 \item{calculate_confidence_int}{numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.}
 
-\item{n_threads}{numeric - how many threads/cores can be used to parallelize? 
+\item{n_threads}{numeric - how many threads/cores can be used to parallelize?
 See details.}
 }
 \value{
@@ -49,11 +50,11 @@ list of alpha from each initialization.
 deconvolution step
 }
 \details{
-The \link[pbapply]{pbapply} function is used to speed up 
+The \link[pbapply:pbapply]{pbapply} function is used to speed up
 computations.
-Each initialization is sent to a different core for processing, but the EM 
+Each initialization is sent to a different core for processing, but the EM
 itself occurs on a single core.
-To speed up processing with a single core, 
+To speed up processing with a single core,
 fewer initialization can be set.
 }
 \examples{

@@ -1,7 +1,7 @@
 #' deconvolution step
 #'
 #' @param sample_pat Path to sample PAT file (output from wgbstools)
-#' @param reference Output from \code{\link{learn_reference}} function.
+#' @param reference Output from [learn_reference()] function.
 #' @param filter_reads_with_n_cpgs integer - pass to filter.length, filter reads from PAT file with less than n CpG sites. Default 3.
 #' @param quiet logical - should output be delivered silently? Default is FALSE.
 #' @param num_of_inits numeric - how many random prior initializations to set 
@@ -15,7 +15,7 @@
 #' See details.
 #' @param calculate_confidence_int numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.
 #' 
-#' @details The \link[pbapply]{pbapply} function is used to speed up 
+#' @details The [pbapply][pbapply::pbapply] function is used to speed up 
 #' computations.
 #' Each initialization is sent to a different core for processing, but the EM 
 #' itself occurs on a single core.
@@ -35,7 +35,7 @@ deconvolute_sample <- function(sample_pat,
                                filter_reads_with_n_cpgs = 3,
                                quiet = F, 
                                retain_alphas = F,
-                               output_format = "all",
+                               output_format = "simple",
                                num_of_inits = 10, 
                                max_iter = 100,
                                use.empirical = F,

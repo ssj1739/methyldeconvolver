@@ -33,7 +33,7 @@ encode_binary <- function(read){
 #' @param output.as.granges 
 #' @param verbose 
 #'
-#' @return
+#' @return filtered PAT ranges
 #' @export
 #'
 filter_pat <- function(pat, filter.noninf = T, 

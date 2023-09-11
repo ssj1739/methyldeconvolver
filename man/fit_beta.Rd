@@ -3,7 +3,8 @@
 \name{fit_beta}
 \alias{fit_beta}
 \title{fit_beta
-Fits a beta distribution to given methylation signals from sample pat file}
+Fits a beta distribution to given methylation signals from sample pat file
+Uses optim method to find mle and mme using empirical mean and variance}
 \usage{
 fit_beta(overlaps.list, pseudo = 1e-07, verbose = F)
 }
@@ -18,6 +19,7 @@ beta params for each marker region using stats::optim
 \description{
 fit_beta
 Fits a beta distribution to given methylation signals from sample pat file
+Uses optim method to find mle and mme using empirical mean and variance
 }
 \examples{
 \dontrun{

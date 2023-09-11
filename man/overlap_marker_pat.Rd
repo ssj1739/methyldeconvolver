@@ -2,9 +2,9 @@
 % Please edit documentation in R/overlap_marker_pat.R
 \name{overlap_marker_pat}
 \alias{overlap_marker_pat}
-\title{Overlap marker and APT files}
+\title{Overlap marker and PAT files}
 \usage{
-overlap_marker_pat(pat, marker, n_threads = 1)
+overlap_marker_pat(pat, marker, split_reads = F, n_threads = 1)
 }
 \arguments{
 \item{pat}{Some description of PAT files}

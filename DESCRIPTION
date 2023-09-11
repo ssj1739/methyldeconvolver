@@ -21,7 +21,12 @@ Imports:
     stats,
     parallel,
     data.table,
-    GenomicRanges
+    GenomicRanges,
+    rlang,
+    lifecycle,
+    cli,
+    glue,
+    withr
 NeedsCompilation: no
 Packaged: 2022-04-22 13:52:53 UTC; sidharthjain
 Depends: R (>= 3.5.0)
@@ -32,3 +37,4 @@ Suggests:
     rmarkdown
 Config/testthat/edition: 3
 VignetteBuilder: knitr
+Roxygen: list(markdown = TRUE)

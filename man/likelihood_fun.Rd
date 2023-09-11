@@ -4,7 +4,7 @@
 \alias{likelihood_fun}
 \title{Calculate likelihood}
 \usage{
-likelihood_fun(psi, alpha, epsilon = 1e-07)
+likelihood_fun(psi, alpha, epsilon = 1e-99)
 }
 \arguments{
 \item{psi}{matrix of psi values}

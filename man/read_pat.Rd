@@ -4,13 +4,7 @@
 \alias{read_pat}
 \title{read_pat}
 \usage{
-read_pat(
-  path = "data/ref/Hep_all.pat.gz",
-  linelimit = Inf,
-  filter.noninf = T,
-  filter.length = 3,
-  verbose = F
-)
+read_pat(path = "data/ref/Hep_all.pat.gz", linelimit = Inf, verbose = F, ...)
 }
 \arguments{
 \item{path}{character indicating path to PAT file. May be gzipped.}
@@ -23,7 +17,7 @@ read_pat(
 data.frame containing contents of pat file.
 }
 \description{
-Reads in PAT-format files (output from wgbstools). 
+Reads in PAT-format files (output from wgbstools).
 Also includes
 }
 \examples{

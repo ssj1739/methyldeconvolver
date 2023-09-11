@@ -22,15 +22,62 @@ We curated a set of reference data, as described in [McNamara et al. 2023, JCI I
 
 ### Rationale
 
-In this vignette, we show how to use `methyldeconvolveR` to perform cell type deconvolution from liquid biopsy samples. First, we load the relevant packages.
+In this vignette, we show how to use `methyldeconvolveR` to perform cell type 
+deconvolution from liquid biopsy samples. First, we load the relevant packages.
 
 ```{r setup}
 library(methyldeconvolveR)
-library(tidyverse) # For data cleaning, processing, and visualization
+require(tidyverse) # For data cleaning, processing, and visualization
 ```
+
+Next we load the relevant data. The `methyldeconvolveR` package comes with a
+usable reference atlas to perform deconvolution in 15 different cell types.
+
+We also read in the PAT file here. As part of the read-in, some (or likely many) reads
+will be filtered out, which is reported when verbose = TRUE.
 
 ```{r load_data}
 # First, load the generated or pre-existing reference
-data("reference", package = "methyldeconvolveR")
+ref <- use_reference()
+
+# Next, load the example sample PAT file
+sample_pat_path <- system.file(package = "methyldeconvolveR", "extdata", "SRR8117413_dedup_sorted.pat.gz")
+sample_pat <- read_pat(sample_pat_path, verbose = T)
+head(sample_pat) # glimpse into the PAT file
+
+```
+
+### Analysis
+
+Now, we can perform cell-type deconvolution in a single step with the `deconvolute_sample` function.
+
+```{r deconv}
+# NOTE: The path to the sample pat file or the pat data.frame itself can both be
+# passed to the deconvolute_sample() function. Here, we pass the file path, 
+# where read_pat is called internally.
+
+results <- deconvolute_sample(sample_pat = sample_pat, reference = ref)
+```
+
+By default, 10 random initializations are used, and the log-likelihoods (LL) are computed.
+
+In `results$best_result`, the initialization resulting in the maximum LL is returned.
+
+#### Visualization
+
+We can visualize the results here using the `ggplot2` package.
+
+```{r visualize}
+plot_df <- data.frame(
+  sample_name = "Example Sample",
+  cell_types = names(results$best_result),
+  proportions = results$best_result
+)
+
+colours_custom = c("#00A6FB","#F8A079","#0582CA","#F4743B","#70AE6E","#006494", "#E79345","#483C46","#D9B14F", "#42555C","#CCD059", "#3C6E71","#BEEE62","#568E70")
+
+ggplot(data = plot_df, aes(x = sample_name, y = proportions, fill = cell_types)) +
+  geom_bar(stat = "identity") +
+  scale_fill_manual(values = colours_custom)
 ```
 

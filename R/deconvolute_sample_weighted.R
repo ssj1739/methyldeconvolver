@@ -1,7 +1,7 @@
 #' deconvolution step
 #'
 #' @param sample.pat.path 
-#' @param reference - ref object outputted by \link{learn_reference}
+#' @param reference - ref object outputted by [learn_reference]
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
 #' @param weighting_n_sigma numeric - how many st. devs. away from mean should reads be downweighted?
 #' @param verbose logical - default False

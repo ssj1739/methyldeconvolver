@@ -6,8 +6,8 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-This package exists to allow users to perform cell-type deconvolution
-using whole-genome bisulfite sequencing.
+The `methyldeconvolveR` R package allows users to perform cell-type
+deconvolution using whole-genome bisulfite sequencing at the read-level.
 
 ## Installation
 
@@ -19,31 +19,104 @@ You can install the development version of methyldeconvolveR from
 devtools::install_github("ssj1739/methyldeconvolver")
 ```
 
-## Learn Reference
+## Example
 
-Learn a reference set from given reference pat files of cell types of interest. Requires path to a marker file, path to PAT file directory, and output directory.
-
-Note: Name formats of the reference PAT files should follow the following convention:
-  - Files should end in .pat.gz (bgzipped PAT files outputted from wgbstools).
-  - Files should have the name of the cell type (which perfectly matches the name in the marker file)
-    followed by an underscore, followed by any other names.
-  - e.g. Bcell_Sample_Name.pat.gz
+This is a basic example which shows you how to perform cell-type
+deconvolution using `methyldeconvolveR`:
 
 ``` r
 library(methyldeconvolveR)
-## basic example code
-learn_reference(marker.file = "marker.txt", pat.dir = "data/ref/", save.output = "reference.rds")
 ```
 
-## Deconvolute Sample
-Deconvolution algorithm for a single liquid biopsy sample. Requires a path to sample in PAT format and reference .rds object.
-  - Default "simple" output is a named vector of cell-type proportion estimates that maximize the log-likelihood function.
-  - EM initializations and stopping criteria can be adjusted by the user from defaults.
-  - Multiple threads/cores can be used to parallelize computations by specifying --n_threads
+The reference atlas from McDeed et al. is included in the package, and
+can be accessed with the `use_reference` function as shown here:
 
 ``` r
-ref = "/path/to/reference/reference.rds"
-deconvolute_sample_weighted(sample_pat = "sample_to_deconvolute.pat.gz", reference = ref)
+ref <- use_reference()
+
+# A quick glimpse at the marker regions included in the reference
+head(ref$marker)
+#> Loading required package: GenomicRanges
+#> Loading required package: stats4
+#> Loading required package: BiocGenerics
+#> 
+#> Attaching package: 'BiocGenerics'
+#> The following objects are masked from 'package:stats':
+#> 
+#>     IQR, mad, sd, var, xtabs
+#> The following objects are masked from 'package:base':
+#> 
+#>     anyDuplicated, aperm, append, as.data.frame, basename, cbind,
+#>     colnames, dirname, do.call, duplicated, eval, evalq, Filter, Find,
+#>     get, grep, grepl, intersect, is.unsorted, lapply, Map, mapply,
+#>     match, mget, order, paste, pmax, pmax.int, pmin, pmin.int,
+#>     Position, rank, rbind, Reduce, rownames, sapply, setdiff, sort,
+#>     table, tapply, union, unique, unsplit, which.max, which.min
+#> Loading required package: S4Vectors
+#> Warning: package 'S4Vectors' was built under R version 4.2.2
+#> 
+#> Attaching package: 'S4Vectors'
+#> The following objects are masked from 'package:base':
+#> 
+#>     expand.grid, I, unname
+#> Loading required package: IRanges
+#> Loading required package: GenomeInfoDb
+#> Warning: package 'GenomeInfoDb' was built under R version 4.2.2
+#> GRanges object with 6 ranges and 4 metadata columns:
+#>       seqnames      ranges strand |         label original.ind  n_merged
+#>          <Rle>   <IRanges>  <Rle> |   <character>  <character> <numeric>
+#>   [1]     chr1 19109-19123      * |    kidneypodo          888         1
+#>   [2]     chr1 26367-26376      * |        neuron         1107         1
+#>   [3]     chr1 35274-35282      * | pancreasislet         1259         1
+#>   [4]     chr1 37247-37265      * |   lungbroncep         1071         1
+#>   [5]     chr1 74294-74301      * |   lungbroncep         1082         1
+#>   [6]     chr1 75524-75532      * | endoumbilical          647         1
+#>                      q.val
+#>                <character>
+#>   [1]  0.00461229366172981
+#>   [2]   0.0365386827647005
+#>   [3]  0.00492478327471677
+#>   [4] 8.63554114486374e-06
+#>   [5] 8.63554114486374e-06
+#>   [6]   0.0566146858141978
+#>   -------
+#>   seqinfo: 23 sequences from an unspecified genome; no seqlengths
+
+# And a glimpse at the learned reference parameters
+head(ref$beta_celltype_fits$breastbasal)
+#>     shape1      shape2    beta.f    shape1.emp shape2.emp beta.f.emp
+#> 1 1.008154  0.40294023  2.471332  2.3072836280  1.2506265  0.2996177
+#> 3 0.050000 20.00000000 16.781699 -0.0000000999 -0.9989999        NaN
+#> 4 1.282434  0.10956285  8.771076  4.8120904245  0.5618180  0.6720254
+#> 5 2.085269  0.08421711 10.903672  3.9324666649  0.1809600  4.0607914
+#> 8 1.808806  0.08081999 11.566910  3.3368846465  0.1756258  4.3586285
+#> 9 2.022330  0.08452414 10.896033  4.5444987455  0.2230995  2.9745582
+#>   marker.index        mu       sigma   n psi.init
+#> 1            1 0.6484941 0.050011848  86        1
+#> 3            3 0.0000001 0.000100000  24        1
+#> 4            4 0.8954545 0.014687338  22        1
+#> 5            5 0.9560075 0.008224851 185        1
+#> 8            8 0.9499999 0.010526307  20        1
+#> 9            9 0.9532051 0.007733753  26        1
 ```
 
+Reference parameters were learned using PAT files from each cell type,
+as shown in the following function (not run). New references can be
+learned given a set of marker regions and PAT files generated by
+`wgbstools`.
 
+``` r
+### NOT RUN:
+newref <- learn_reference(marker.file = "markers.bed",
+                pat.dir = "/path/to/directory/",
+                save.output = T, verbose = T, 
+                n_threads = 8, split_reads = F)
+```
+
+Cell type deconvolution can be performed by the following (not run):
+
+``` r
+results <- deconvolute_sample(sample_pat = "path/to/sample.pat.gz", 
+                   reference = ref, quiet = F, 
+                   num_of_inits = 100, n_threads = 8)
+```

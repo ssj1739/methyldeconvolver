@@ -18,7 +18,9 @@ deconvolute_sample_weighted(
 \arguments{
 \item{sample.pat.path}{}
 
-\item{reference}{- ref object outputted by \link{learn_reference}}
+\item{reference}{\itemize{
+\item ref object outputted by \link{learn_reference}
+}}
 
 \item{verbose}{logical - default False}
 

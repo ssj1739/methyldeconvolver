@@ -4,11 +4,12 @@
 #' 
 #' @return reference object
 #' @export
-#'
 #' @examples
 #' 
 #' ref <- use_reference()
 #' names(ref)
+#' 
+#' 
 use_reference <- function(){
   data("reference", package = "methyldeconvolveR")
   return(reference)

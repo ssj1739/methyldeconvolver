@@ -5,8 +5,16 @@
 #' @param pat.dir 
 #' @param cell_type 
 #'
-#' @return
+#' @return character vector of reads at specified marker region
 #' @export
+#' 
+#' @examples
+#' \dontrun{
+#'   marker <- use_reference()$marker
+#'   pat <- System.file("")
+#'   get_pat_reads_at_marker_region(marker, marker.ind = 5, pat.file = )
+#' }
+#' 
 #'
 get_pat_reads_at_marker_region <- function(marker, marker.ind, pat.file=NULL, pat.dir=NULL, cell_type=NULL, 
                                            filter.noninf = T, filter.length = 3, filter.inf.length = 3){

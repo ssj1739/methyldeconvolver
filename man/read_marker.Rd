@@ -4,7 +4,7 @@
 \alias{read_marker}
 \title{read_marker}
 \usage{
-read_marker(path = "data/Human_mixintest_top25.txt", linelimit = Inf)
+read_marker(path = "", no_reduction = F, header = T, sep = "\\t")
 }
 \arguments{
 \item{path}{character indicating path to PAT file. May be gzipped.}
