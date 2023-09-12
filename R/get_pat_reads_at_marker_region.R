@@ -18,6 +18,8 @@
 #'
 get_pat_reads_at_marker_region <- function(marker, marker.ind, pat.file=NULL, pat.dir=NULL, cell_type=NULL, 
                                            filter.noninf = T, filter.length = 3, filter.inf.length = 3){
+  
+  
   # TODO: Get a vector of the pat reads from a cell_type at a specific marker region.
   # First, read files:
   if(!is.null(pat.dir)){

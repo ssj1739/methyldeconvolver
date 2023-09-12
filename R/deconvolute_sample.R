@@ -41,12 +41,12 @@ deconvolute_sample <- function(sample_pat,
                                use.empirical = F,
                                calculate_confidence_int = NA,
                                n_threads = 1){
-  if(require(pbapply)){
-    xapply <- function(...) pbapply::pblapply(..., cl = n_threads)
-  }else{
-    if(!quiet) warning("pbapply not installed or available. Using base lapply instead.")
-    xapply <- function(...) lapply(...)
-  }
+
+  # Load required packages
+  require(dplyr)
+  require(parallel)
+  require(stats)
+  
   
   # TODO: VALIDATE ALL PARAMS
   if(max_iter <= 1 & !is.integer(max_iter))
@@ -71,6 +71,13 @@ deconvolute_sample <- function(sample_pat,
     n_threads <- 1
     if(!quiet) message("To use multi-core capability of pbapply,
                        UNIX-like systems like Linux or macOS must be used. Changing number of threads to 1.")
+  }
+  
+  if(require(pbapply)){
+    xapply <- function(...) pbapply::pblapply(..., cl = n_threads)
+  }else{
+    if(!quiet) warning("pbapply not installed or available. Using base lapply instead.")
+    xapply <- function(...) lapply(...)
   }
   
   if(!quiet) message("Reading and aligning PAT file to marker reference.")
@@ -267,8 +274,8 @@ deconvolute_sample <- function(sample_pat,
         boot_res <- deconvolute_sample(sample_pat = boot_pat, reference = reference, quiet = T, num_of_inits = 10, n_threads = 1, retain_alphas = F, output_format = 'simple', calculate_confidence_int = NA)
         return(boot_res)
       }, cl = n_threads)
-      boot_means <- boot_output %>% bind_rows() %>% summarize(across(everything(), mean)) %>% unlist()
-      boot_sd <- boot_output %>% bind_rows() %>% summarize(across(everything(), sd)) %>% unlist()
+      boot_means <- boot_output %>% dplyr::bind_rows() %>% dplyr::summarize(dplyr::across(dplyr::everything(), mean)) %>% unlist()
+      boot_sd <- boot_output %>% dplyr::bind_rows() %>% dplyr::summarize(dplyr::across(dplyr::everything(), stats::sd)) %>% unlist()
       upper_CI <- boot_means + alpha*(boot_sd/sqrt(n.boots))
       lower_CI <- boot_means - alpha*(boot_sd/sqrt(n.boots))
       output$boot_CI <- data.frame(

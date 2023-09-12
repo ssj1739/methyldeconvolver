@@ -1,5 +1,23 @@
-boostrap_confidence_interval <- function(num_boots = 1000, sample_pat, reference, n_threads){
+#' bootstrap_confidence_interval
+#'
+#' @param num_boots number of bootstraps
+#' @param sample_pat pat file to bootstrap from
+#' @param reference reference object
+#' @param n_threads number of threads (default 1)
+#'
+#' @return
+#'
+#' @examples
+#' \dontrun{
+#' bootstrap_confidence_interval(num_boots = 1000, sample_pat = "sample.pat.gz", reference = ref)
+#' }
+#' 
+bootstrap_confidence_interval <- function(num_boots = 1000, sample_pat, reference, n_threads = 1){
   pbapply::pblapply(1:num_boots, function(x){
+    require(dplyr)
+    require(pbapply)
+    require(stats)
+    
     boot_pat <- sample.pat %>% dplyr::slice_sample(n = nrow(sample.pat))
     boot_omp <- overlap_marker_pat(pat = boot_pat, marker = reference$marker)
     

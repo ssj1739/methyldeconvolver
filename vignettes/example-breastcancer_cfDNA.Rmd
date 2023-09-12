@@ -27,7 +27,7 @@ deconvolution from liquid biopsy samples. First, we load the relevant packages.
 
 ```{r setup}
 library(methyldeconvolveR)
-require(tidyverse) # For data cleaning, processing, and visualization
+library(tidyverse) # For data cleaning, processing, and visualization
 ```
 
 Next we load the relevant data. The `methyldeconvolveR` package comes with a
@@ -65,19 +65,10 @@ In `results$best_result`, the initialization resulting in the maximum LL is retu
 
 #### Visualization
 
-We can visualize the results here using the `ggplot2` package.
+We can visualize the results here using `plot_deconv` function, which is built
+using the `ggplot2` package.
 
 ```{r visualize}
-plot_df <- data.frame(
-  sample_name = "Example Sample",
-  cell_types = names(results$best_result),
-  proportions = results$best_result
-)
-
-colours_custom = c("#00A6FB","#F8A079","#0582CA","#F4743B","#70AE6E","#006494", "#E79345","#483C46","#D9B14F", "#42555C","#CCD059", "#3C6E71","#BEEE62","#568E70")
-
-ggplot(data = plot_df, aes(x = sample_name, y = proportions, fill = cell_types)) +
-  geom_bar(stat = "identity") +
-  scale_fill_manual(values = colours_custom)
+plot_deconv(results)
 ```
 

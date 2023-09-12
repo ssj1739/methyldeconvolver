@@ -10,7 +10,7 @@ deconvolute_sample(
   filter_reads_with_n_cpgs = 3,
   quiet = F,
   retain_alphas = F,
-  output_format = "all",
+  output_format = "simple",
   num_of_inits = 10,
   max_iter = 100,
   use.empirical = F,

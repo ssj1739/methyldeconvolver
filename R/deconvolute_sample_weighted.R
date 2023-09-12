@@ -24,6 +24,8 @@ deconvolute_sample_weighted <- function(sample.pat.path,
                                n_threads = 1){
   # LOAD LIBRARIES
   require(pbapply)
+  require(dplyr)
+  require(stats)
   
   # TODO: VALIDATE PARAMS
   
@@ -160,8 +162,8 @@ deconvolute_sample_weighted <- function(sample.pat.path,
        cs.0 = colSums(phi.0 * sample.pat$nobs[omp$overlaps@from[which(y.mat[,1]==0)]])
        new.alpha.0 = cs.0 / sum(cs.0)
      
-      omega.vec.1 <- predict(zeta.fit, newdata = data.frame(alpha = new.alpha.1), type = "response")
-      omega.vec.0 <- predict(zeta.fit, newdata = data.frame(alpha = new.alpha.0), type = "response")
+      omega.vec.1 <- stats::predict(zeta.fit, newdata = data.frame(alpha = new.alpha.1), type = "response")
+      omega.vec.0 <- stats::predict(zeta.fit, newdata = data.frame(alpha = new.alpha.0), type = "response")
       
       alpha.avg = ((new.alpha.1 * omega.vec.1) + (new.alpha.0 * (1-omega.vec.0)))/(omega.vec.1 + (1-omega.vec.0))
       new.alpha = alpha.avg/sum(alpha.avg)
