@@ -12,6 +12,8 @@ fit_beta(overlaps.list, pseudo = 1e-07, verbose = F)
 \item{overlaps.list}{output from overlap_marker_pat}
 
 \item{pseudo}{add pseudocount to avoid Inf/-Inf log values (default = 1e-7)}
+
+\item{verbose}{logical - verbose output? Default is FALSE.}
 }
 \value{
 beta params for each marker region using stats::optim

@@ -7,8 +7,17 @@
 #' 
 #' @param results - either the simple output of deconvolute_sample, or the 
 #' "best_result" slot in the full output of deconovlute_sample
+#' @param x.lab Character passed to ggplot2::xlab()
+#' @param y.lab Character passed to ggplot2::ylab() 
 #' @param ... Other arguments passed on to ggplot2::theme().
 #'
+#' @importFrom ggplot2 ggplot
+#' @importFrom ggplot2 aes
+#' @importFrom ggplot2 geom_bar
+#' @importFrom ggplot2 scale_fill_manual
+#' @importFrom ggplot2 theme_minimal
+#' @importFrom ggplot2 xlab
+#' @importFrom ggplot2 ylab
 #' @export
 #'
 #' @examples

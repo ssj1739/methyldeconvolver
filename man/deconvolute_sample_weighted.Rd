@@ -22,7 +22,7 @@ deconvolute_sample_weighted(
 \item ref object outputted by \link{learn_reference}
 }}
 
-\item{verbose}{logical - default False}
+\item{verbose}{logical - default is FALSE.}
 
 \item{weighting_n_sigma}{numeric - how many st. devs. away from mean should reads be downweighted?}
 
@@ -30,7 +30,9 @@ deconvolute_sample_weighted(
 
 \item{max_iter}{integer - maximum number of iterations for EM step}
 
-\item{n_threads}{integer - number of threads to}
+\item{retain_alphas}{logical - default is FALSE.}
+
+\item{n_threads}{integer - number of threads to use}
 }
 \value{
 list of alpha from each initialization.

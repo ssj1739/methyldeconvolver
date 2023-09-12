@@ -38,6 +38,8 @@ for the EM approach. Default is 1 (uniform prior).}
 \item{max_iter}{numeric - how many iterations of EM should be the maximum
 (Default is 100 - convergence usually achieved before this)}
 
+\item{use.empirical}{logical - use empirical estimates of beta params? Default is FALSE.}
+
 \item{calculate_confidence_int}{numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.}
 
 \item{n_threads}{numeric - how many threads/cores can be used to parallelize?

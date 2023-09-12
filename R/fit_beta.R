@@ -4,10 +4,17 @@
 #'
 #' @param overlaps.list output from overlap_marker_pat
 #' @param pseudo add pseudocount to avoid Inf/-Inf log values (default = 1e-7)
+#' @param verbose logical - verbose output? Default is FALSE.
 #'
 #' @return beta params for each marker region using stats::optim
 #'
+#' @importFrom stats dbeta
+#' @importFrom stats var
+#' @importFrom stats optim
+#' @importFrom stringr str_count
+#' 
 #' @export
+#' 
 #' @examples
 #' \dontrun{
 #' fit_beta(overlaps.list)
@@ -106,6 +113,7 @@ fit_beta <- function(overlaps.list, pseudo = 1e-7, verbose = F){
                          #lower = 0.0001, upper = 10000)
         res$par
       }, error = function(e) return(c(NA, NA)))
+      # Set heuristics based on calculated mu if unable to learn parameters
       if(all(is.na(fit.mle))){
         if(mu > 0.5){
           fit.mle[1] <- 20

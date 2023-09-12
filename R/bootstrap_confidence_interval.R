@@ -5,7 +5,7 @@
 #' @param reference reference object
 #' @param n_threads number of threads (default 1)
 #'
-#' @return
+#' @return confidence intervals around each proportion estimate
 #'
 #' @examples
 #' \dontrun{

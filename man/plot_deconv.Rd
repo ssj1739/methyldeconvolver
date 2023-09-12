@@ -12,6 +12,10 @@ plot_deconv(results, colormap, ...)
 "best_result" slot in the full output of deconovlute_sample
 }}
 
+\item{x.lab}{Character passed to ggplot2::xlab()}
+
+\item{y.lab}{Character passed to ggplot2::ylab()}
+
 \item{...}{Other arguments passed on to ggplot2::theme().}
 }
 \description{

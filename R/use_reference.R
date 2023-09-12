@@ -11,6 +11,6 @@
 #' 
 #' 
 use_reference <- function(){
-  data("reference", package = "methyldeconvolveR")
+  data("reference", package = "methyldeconvolveR", envir = environment())
   return(reference)
 }

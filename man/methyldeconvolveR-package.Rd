@@ -6,7 +6,7 @@
 \alias{methyldeconvolveR-package}
 \title{methyldeconvolveR: Reference-based deconvolution of tissues using DNA methylation}
 \description{
-Deconvolution of whole genome bisulfite sequencing methylation data from bulk into individual cell types using a multinomial model. Inference of cell type proportions is performed using the expectation-maximization algorithm.
+Deconvolution of whole genome methylation sequencing data from bulk into individual cell types using a multinomial model. Inference of cell type proportions is performed using the expectation-maximization algorithm.
 }
 \author{
 \strong{Maintainer}: Sidharth Singh Jain \email{sidharthsjain@gmail.com} (\href{https://orcid.org/0000-0000-0000-0000}{ORCID})

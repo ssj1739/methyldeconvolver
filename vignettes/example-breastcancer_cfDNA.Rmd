@@ -1,6 +1,7 @@
 ---
 title: "example-breastcancer_cfDNA"
 output: rmarkdown::html_vignette
+Imports: tidyverse
 vignette: >
   %\VignetteIndexEntry{example-breastcancer_cfDNA}
   %\VignetteEngine{knitr::rmarkdown}
@@ -27,7 +28,6 @@ deconvolution from liquid biopsy samples. First, we load the relevant packages.
 
 ```{r setup}
 library(methyldeconvolveR)
-library(tidyverse) # For data cleaning, processing, and visualization
 ```
 
 Next we load the relevant data. The `methyldeconvolveR` package comes with a

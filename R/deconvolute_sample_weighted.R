@@ -4,9 +4,10 @@
 #' @param reference - ref object outputted by [learn_reference]
 #' @param num_of_inits numeric - how many random prior initializations to set for the EM approach. Default is 1 (uniform prior).
 #' @param weighting_n_sigma numeric - how many st. devs. away from mean should reads be downweighted?
-#' @param verbose logical - default False
+#' @param verbose logical - default is FALSE.
 #' @param max_iter integer - maximum number of iterations for EM step
-#' @param n_threads integer - number of threads to 
+#' @param n_threads integer - number of threads to use
+#' @param retain_alphas logical - default is FALSE.
 #'
 #' @return list of alpha from each initialization.
 #'

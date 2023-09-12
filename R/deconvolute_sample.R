@@ -13,6 +13,7 @@
 #' (Default is 100 - convergence usually achieved before this)
 #' @param n_threads numeric - how many threads/cores can be used to parallelize? 
 #' See details.
+#' @param use.empirical logical - use empirical estimates of beta params? Default is FALSE.
 #' @param calculate_confidence_int numeric - level at which confidence interval should be calculated (e.g. 0.95). Defaults to NA, which skips the procedure entirely.
 #' 
 #' @details The [pbapply][pbapply::pbapply] function is used to speed up 
@@ -23,6 +24,13 @@
 #' fewer initialization can be set.
 #'
 #' @return list of alpha from each initialization.
+#' @importFrom parallel detectCores
+#' @importFrom stats runif
+#' @importFrom stats sd
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr summarize
+#' @importFrom dplyr across
+#' @importFrom dplyr everything
 #' @export
 #'
 #' @examples
