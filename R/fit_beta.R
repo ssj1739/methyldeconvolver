@@ -12,6 +12,10 @@
 #' @importFrom stats var
 #' @importFrom stats optim
 #' @importFrom stringr str_count
+#' @importFrom dplyr select
+#' @importFrom dplyr bind_rows
+#' @importFrom dplyr mutate
+#' @importFrom dplyr starts_with
 #' 
 #' @export
 #' 

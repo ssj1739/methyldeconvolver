@@ -9,11 +9,11 @@
 Deconvolution of whole genome methylation sequencing data from bulk into individual cell types using a multinomial model. Inference of cell type proportions is performed using the expectation-maximization algorithm.
 }
 \author{
-\strong{Maintainer}: Sidharth Singh Jain \email{sidharthsjain@gmail.com} (\href{https://orcid.org/0000-0000-0000-0000}{ORCID})
+\strong{Maintainer}: Sidharth Singh Jain \email{sidharthsjain@gmail.com} (\href{https://orcid.org/0000-0002-6263-651X}{ORCID})
 
 Authors:
 \itemize{
-  \item Arthur Patrick McDeed \email{apm116@georgetown.edu} (\href{https://orcid.org/0000-0000-0000-0000}{ORCID})
+  \item Arthur Patrick McDeed \email{apm116@georgetown.edu} (\href{https://orcid.org/0000-0003-3380-4112}{ORCID})
 }
 
 }

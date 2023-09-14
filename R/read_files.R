@@ -10,6 +10,7 @@
 #' Also includes 
 #'
 #' @return data.frame containing contents of pat file.
+#' @importFrom data.table fread
 #' @export
 #'
 #' @examples
@@ -21,7 +22,6 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
                      verbose = F,
                      ...){
   require(data.table)
-  require(dplyr)
   if(verbose) message("Starting to read file.")
   pat = data.table::fread(file = path, nrows = linelimit, header = F)
   colnames(pat)[1:4] <- c("chr", "start", "read", "nobs")
@@ -42,7 +42,8 @@ read_pat <- function(path="data/ref/Hep_all.pat.gz",
 #' Meant to be a more efficient way to stream in large pat files. Still not ready for export.
 #' @param path 
 #' @param chunksize 
-#'
+#' 
+#' @importFrom utils read.table
 #' @return data.frame containing contents of pat file
 #'
 #' @examples
@@ -60,6 +61,7 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
   datachunk <- utils::read.table(con, nrows = chunksize)
   # Stream in file, chunk by chunk - figure out some way to process each chunk here?
   
+  return(datachunk)
   on.exit(close(con))
 }
 
@@ -70,20 +72,20 @@ read_pat2 <- function(path="data/Hep_all.pat.gz", chunksize = 5000){
 #' @param linelimit numeric. Default Inf.
 #'
 #' @return data.frame containing marker file contents
+#' @importFrom utils read.table 
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @export
 #'
 #' @examples
 #' \dontrun{
-#' read_marker(path = "inst_data/human_mixintest_top25.txt")
+#' # Access path to marker using system.file(package = "methyldeconvolveR", "extdata", "marker_example_top100.txt")
+#' read_marker(path = "path/to/marker.txt")
 #' }
 read_marker <- function(path="", no_reduction = F, header = T, sep = "\t"){
-  require(data.table)
+  require(utils)
   require(GenomicRanges)
-  require(tidyverse)
-  require(pbapply)
-  
-  #marker = data.table::fread(path, header = header, skip = "#")
-  marker = read.table(file = path, header = header, sep = sep, comment.char = "#")
+
+  marker = utils::read.table(file = path, header = header, sep = sep, comment.char = "#")
   if(!grepl("[1-9]",marker[1,1])){
     marker <- marker[2:nrow(marker),]
   }

@@ -34,6 +34,10 @@ encode_binary <- function(read){
 #' @param verbose 
 #'
 #' @return filtered PAT ranges
+#' @importFrom dplyr select
+#' @importFrom dplyr filter
+#' @importFrom stringr str_count
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @export
 #'
 filter_pat <- function(pat, filter.noninf = T, 

@@ -55,13 +55,25 @@ simulate_reference <- function(num_celltypes = 5,
 }
 
 
-simulate_pat <- function(ref_list, num_reads = 1e6, true_alpha = NA, zeta0 = -2, zeta1 = 5){
+simulate_pat <- function(ref_list, num_reads = 1e6, true_alpha = NA, zeta0 = -2, zeta1 = 5, n_threads = 1){
+  require(dplyr)
+  
+  if(require(pbapply)){
+    if(n_threads > parallel::detectCores()){
+      warning("Specified more threads than available. Limiting to available cores.")
+      n_threads <- parallel::detectCores()
+    }
+      xapply <- function(...) pblapply(..., cl = n_threads)
+  }else{
+    xapply <- function(...) lapply(...)
+  }
+  
   if(length(true_alpha) == 1 | !is.data.frame(true_alpha)){
-    message("True alpha not specified correctly. Simulating true alpha:")
+    message("True alpha not specified correctly. Simulating true alpha from runif:")
     num_celltypes = length(ref_list)
     alpha <- runif(num_celltypes)
     alpha  <- unlist(lapply(alpha, function(x) x/sum(alpha) ))
-    #hard code alphas:
+    #hard code alphas:x
     #alpha <- c(0.75,0.15,0.03,0.02,0.05)
     cell <- seq(1,num_celltypes)
     true_alpha <- as.data.frame(cbind(cell, alpha))
@@ -72,10 +84,10 @@ simulate_pat <- function(ref_list, num_reads = 1e6, true_alpha = NA, zeta0 = -2,
   
   # flatten ref for compatibility
   ref = dplyr::bind_rows(ref_list, .id = "cell_idx") %>%
-    mutate(cell_idx = as.numeric(cell_idx))
+    dplyr::mutate(cell_idx = as.numeric(cell_idx))
   
   #Generate reads for sample pat
-  sim_pat <- pblapply(1:num_reads, function(x){
+  sim_pat <- xapply(1:num_reads, function(x){
     cell_sim <- rmultinom(1,1,true_alpha[,"alpha"]) #simulate cell of origin
     cell_origin <- which(cell_sim == 1) 
     ref_sub_target <- subset(ref, cell_idx == cell_origin & target == 1) #subset reference by cell of origin
@@ -106,7 +118,7 @@ simulate_pat <- function(ref_list, num_reads = 1e6, true_alpha = NA, zeta0 = -2,
     dplyr::mutate(marker.index = as.numeric(marker.index)) %>%
     dplyr::mutate(nobs = as.numeric(nobs))
   
-
+ # TODO: Complete simulation by simulating chr start stop sites for PAT reads
   
   return(sim_pat)
 }

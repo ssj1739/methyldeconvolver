@@ -6,6 +6,7 @@
 #' @param cell_type 
 #'
 #' @return character vector of reads at specified marker region
+#' @importFrom dplyr bind_rows
 #' @export
 #' 
 #' @examples
@@ -18,7 +19,7 @@
 #'
 get_pat_reads_at_marker_region <- function(marker, marker.ind, pat.file=NULL, pat.dir=NULL, cell_type=NULL, 
                                            filter.noninf = T, filter.length = 3, filter.inf.length = 3){
-  
+  require(dplyr)
   
   # TODO: Get a vector of the pat reads from a cell_type at a specific marker region.
   # First, read files:

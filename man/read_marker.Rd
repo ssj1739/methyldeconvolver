@@ -19,6 +19,7 @@ read_marker
 }
 \examples{
 \dontrun{
-read_marker(path = "inst_data/human_mixintest_top25.txt")
+# Access path to marker using system.file(package = "methyldeconvolveR", "extdata", "marker_example_top100.txt")
+read_marker(path = "path/to/marker.txt")
 }
 }

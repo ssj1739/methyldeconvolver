@@ -24,7 +24,10 @@ Imports:
     lifecycle,
     cli,
     glue,
-    withr
+    withr,
+    dplyr,
+    ggplot2,
+    stringr
 NeedsCompilation: no
 Packaged: 2022-04-22 13:52:53 UTC; sidharthjain
 Depends: R (>= 3.5.0)
